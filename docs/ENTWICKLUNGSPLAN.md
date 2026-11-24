@@ -10,7 +10,7 @@ Jede Phase endet mit einem getesteten Stand und einem Eintrag im [Changelog](CHA
 | 4 Kampf | Angriff, Verteidigung, Ausweichen, Gegner-KI, Animationen | offen |
 | 5 Spielwelt | Landschaft, Gebäude, NPCs, interaktive Objekte | offen |
 | 6 Fortschritt | Missionen, Inventar, Fähigkeiten, Speichern | offen |
-| 7 Design und Sound | Oberfläche, Effekte, Musik, Geräusche | offen |
+| 7 Design und Sound | Oberfläche (inkl. Einstellungen mit Kamera-Schieberegler), Effekte, Musik, Geräusche | offen |
 | 8 TestFlight | Native Builds, Performance, Fehler, Gerätetests | offen |
 | 9 Veröffentlichung | App-Store-Vorbereitung | offen |
 
@@ -31,7 +31,8 @@ Jede Phase endet mit einem getesteten Stand und einem Eintrag im [Changelog](CHA
 - [x] Touch-Steuerung: schwebender Joystick links, Kamera rechts, Knöpfe Sprung und Schleichen, Safe Area
 - [x] Logik-Tests (45) und zwei Simulationen (Bewegung, Touch) laufen lokal grün
 - [ ] CI auf GitHub grün (nach dem Push prüfen)
-- [ ] Am iPhone getestet: Gefühl der Steuerung, Bildrate, Safe Area – **nur der Nutzer kann das prüfen**
+- [x] Am iPhone getestet (Nutzer 2026-11-24, Build 5): „sieht alles gut aus“; Kamera darf etwas schneller sein (umgesetzt: 0,2 statt 0,16)
+- [ ] Bildrate und Safe Area mit Messwerten belegt (Zahlen aus der Messanzeige stehen noch aus)
 - [ ] Spielgefühl nach Rückmeldung nachjustieren (Werte in `core/controls_config.gd`)
 
 Nicht Teil von Phase 3: richtiges Ninja-Modell und Animationen (Platzhalter), Lock-on-Kamera, Kampf (Phase 4).

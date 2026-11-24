@@ -7,7 +7,8 @@ extends RefCounted
 # Touch-Steuerung
 const JOYSTICK_RADIUS := 110.0
 const JOYSTICK_DEADZONE := 0.12
-const LOOK_DEG_PER_PX := 0.16
+## Standard-Empfindlichkeit der Kamera in Grad pro Pixel. Später per Regler in den Einstellungen.
+const LOOK_DEG_PER_PX := 0.2
 const SCREEN_SPLIT := 0.5
 const BUTTON_RADIUS := 52.0
 const BUTTON_MARGIN := 36.0

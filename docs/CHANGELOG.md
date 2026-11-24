@@ -7,7 +7,7 @@
 - Bildrate auf 60 fps begrenzt, Physik-Interpolation für ruhige Bewegung bei hoher Bildwiederholrate.
 - 45 Logik-Tests und zwei Simulationen (Bewegung, Touch) lokal grün; beide Simulationen laufen in der CI.
 - Erste Übersetzungsdatei `locale/de.po` für die Knopfbeschriftungen.
-- Noch nicht am iPhone geprüft.
+- Am iPhone getestet (Build 5): Steuerung in Ordnung, Kamera auf Wunsch etwas schneller (0,2 Grad pro Pixel). Die Empfindlichkeit steckt jetzt im Kamera-Rig, damit später ein Schieberegler in den Einstellungen sie setzen kann.
 
 ## 2026-11-24 – Erster erfolgreicher iPhone-Build
 - Lauf 4 des Workflows „iPhone-Build (TestFlight)“ auf `main`: alle Schritte grün (Zugangsdaten-Prüfung, Godot-Export, Archiv, Signieren und Upload).

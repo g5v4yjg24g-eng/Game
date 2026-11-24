@@ -4,6 +4,8 @@ extends Node3D
 
 @export var target: Node3D
 
+## Empfindlichkeit in Grad pro Pixel (später aus den Einstellungen).
+var look_sensitivity := ControlsConfig.LOOK_DEG_PER_PX
 var yaw_deg := 0.0
 var pitch_deg := ControlsConfig.START_PITCH_DEG
 
@@ -69,6 +71,6 @@ func _apply_rotation() -> void:
 
 
 func _on_look_input(drag: Vector2) -> void:
-	var look := CameraMath.apply_look(yaw_deg, pitch_deg, drag)
+	var look := CameraMath.apply_look(yaw_deg, pitch_deg, drag, look_sensitivity)
 	yaw_deg = look.x
 	pitch_deg = look.y
