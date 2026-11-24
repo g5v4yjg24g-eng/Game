@@ -9,7 +9,7 @@
 | Bundle-ID | Entschieden | `com.fangpunkt.game` |
 | Repository | Entschieden | Alles unter `g5v4yjg24g-eng/Game`; Angelkarte-Deutschland und fangpunkt_webside bleiben unberührt |
 | Story | Entschieden | Auftragsmörder: erst blinder Gehorsam, dann wachsendes Hinterfragen des Auftraggebers (2026-11-24) |
-| Zielrichtung Figur | Entschieden als Richtung (Nutzer 2026-11-24, Referenzbild), Umbau **später** | Siehe Abschnitt „Zielrichtung Figur“ unten. Die jetzige Figur ist eine Zwischenstufe. |
+| Zielrichtung Figur | Entschieden als Richtung (Nutzer 2026-11-24, Referenzbild), Umbau **nach dem Test des Zwischenstands** | Siehe Abschnitt „Zielrichtung Figur“ unten. Die jetzige Figur ist eine Zwischenstufe. |
 | Spielfigur | Vorläufig (Vorschlag von Claude, Nutzer prüft im Test) | Eigenes stilisiertes Modell (etwa 7 000 Dreiecke, dunkelblauer Stoff, roter Schal und Gürtel, Schwert auf dem Rücken), per Skript in Blender erzeugt, ersetzt die Platzhalterfigur. Nur Version 1: Proportionen, Farben und Details sind änderbar. |
 | Touch-Steuerung | Entschieden (Nutzer 2026-11-24: „wie geplant“) | Schwebender Joystick links (Mitte dort, wo der Daumen aufsetzt), Kamera per Wischen in der rechten Hälfte |
 | Sprung- und Schleichknopf | Vorläufig | Knöpfe rechts unten; Schleichen ist ein Umschalter (Vorschlag von Claude) |
@@ -18,7 +18,7 @@
 | Arbeitstitel | Vorläufig | „Kagero“ |
 | Umfang Start | Vorläufig | Vertical Slice (Dorf, Wald, Festung) |
 | Kamera | Vorläufig | Geführte Third-Person mit Lock-on |
-| Grafikstil | Vorläufig | Stilisiert, Low-Poly-Basis mit starkem Licht |
+| Grafikstil | **Entschieden** (Nutzer 2026-11-24) | **Cartoon-Stil für das ganze Spiel** (Figuren, Gegner, Welt, Oberfläche), nach dem Referenzbild der Figur: flächige Schattierung, dicke dunkle Umrisse, kräftige Farben. Die **Story bleibt ernst**: der Stil ändert nicht den Ton (Auftragsmörder, wachsender Zweifel). Später kommen auch **fiktive Figuren** dazu. |
 | Weltaufbau | Vorläufig | Hubs mit Missionsgebieten |
 | Kampfsystem | Vorläufig | Hybrid aus Schleichen und Parieren |
 | Assets | Vorläufig | Start mit freien (CC0-)Paketen, Lizenz vorher prüfen |
@@ -41,6 +41,8 @@ Der Nutzer wünscht sich, dass die Ninja-Figur in Zukunft **ähnlich wie ein Ref
 - **Flächiger Cartoon-Look** mit dicken dunklen Umrissen und wenigen Schattenstufen.
 
 Folgen und offene Fragen (noch nicht entschieden):
-- Der Stil weicht vom ursprünglichen Wunsch „stilisiert-realistisch“ und vom ernsten Ton der Story (Auftragsmörder) ab. **Offen:** Soll nur die Figur im Cartoon-Stil sein, oder das ganze Spiel (Welt, Gegner, Oberfläche)? Empfehlung von Claude: erst die Figur, die Welt bleibt stilisiert, danach gemeinsam entscheiden.
+- Entschieden (Nutzer 2026-11-24): Der Cartoon-Stil gilt für das **ganze Spiel**, nicht nur für die Figur. Er ersetzt den ursprünglichen Wunsch „stilisiert-realistisch“. Die Story bleibt ernst; der Ton entsteht über Inhalt, Musik, Licht und Farbstimmung, nicht über den Zeichenstil.
+- Folgen: Welt, Gegner, Waffen und Oberfläche werden an den Stil angepasst (gleiche Umrisse, gleiche Schattierung). Die jetzige Testwelt ist noch nicht im Cartoon-Stil.
+- **Offen:** Welche fiktiven Figuren und Wesen später vorkommen (Nutzer nennt das als Richtung, Einzelheiten folgen); Farbpalette und Lichtstimmung für ernste Szenen.
 - Technisch möglich (Godot, Mobile): Umrisse (Zusatznetz oder Nachbearbeitung) und flächige Schattierung per Shader. Kosten für Bildrate und Akku sind am Gerät zu messen.
 - Umbau im Blender-Skript: Proportionen, Stirnband mit Schweif, Schulter- und Knieschützer, größere Augen (Gesicht als eigene Form oder einfache Textur), Fäuste.
