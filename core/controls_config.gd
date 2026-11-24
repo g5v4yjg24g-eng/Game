@@ -21,13 +21,14 @@ const STYLE_BUTTON_RADIUS := 30.0
 const MIN_PITCH_DEG := -65.0
 const MAX_PITCH_DEG := 25.0
 const START_PITCH_DEG := -14.0
-const CAMERA_DISTANCE := 5.0
-const CAMERA_HEIGHT := 1.5
+const CAMERA_DISTANCE := 4.0
+const CAMERA_HEIGHT := 1.15
 const CAMERA_FOLLOW_SPEED := 12.0
 
 # Bewegung
-const RUN_SPEED := 6.5
-const SNEAK_SPEED := 2.4
+## Entwurfstempo des Laufzyklus: gleich RUN_SPEED in tools/blender/build_ninja.py (Test prüft das).
+const RUN_SPEED := 5.2
+const SNEAK_SPEED := 1.9
 const ACCELERATION := 38.0
 const TURN_SPEED := 14.0
 const JUMP_SPEED := 7.0

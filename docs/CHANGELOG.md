@@ -1,5 +1,16 @@
 # Changelog
 
+## 2026-11-24 – Figur nach Referenz umgebaut (Branch `claude/cartoon-vorbereitung`)
+- Anlass: Nutzer meldet, der Lauf sehe besser aus, aber die Knie gingen zu weit hoch, und schlägt vor, **zuerst die Figur wie angefordert neu zu bauen und dann die Animationen zu perfektionieren**.
+- Neue Figur im Blender-Skript (Chibi, 1,45 m): großer Kopf, Kapuze mit Maske, große Augen mit zornigen Brauen, rotes Stirnband mit Spitzen und flatternden Enden, rote Schulterpolster, Gürtelknoten, Wickelkragen, rote Knieschützer, Fäuste, Stiefel, Schwert. Skelett weiter 21 Knochen (Schal-Kette heißt jetzt `band_1` bis `band_3`).
+- Umriss: dünne Teile bekommen über die Vertexfarbe einen schmaleren Umriss (Stirnband-Enden, Schwert).
+- Laufzyklus an die kürzeren Beine angepasst: Entwurfstempo 5,2 m/s, Zyklus 0,53 s, Kontakt 0,07 s, **Kniebeugung bis 73 Grad** (vorher 109), Standfuß gemessen 5,20 m/s (kein Rutschen), nichts gekürzt.
+- Spielwerte der Größe angepasst (Vorschlag, zurückstellbar): Lauftempo 5,2, Schleichen 1,9, Kamera 4,0 m und Zielhöhe 1,15 m, Kollisionsform 1,45 m. Sprungstärke unverändert.
+- Cartoon-Schattierung etwas gedämpft (Lichtstufe 0,7, Mittelstufe 0,38), weil die anthrazitfarbene Kleidung im Licht beige-grau wirkte.
+- Tests von festen Tempo- und Bildzahlen gelöst (Entwurfstempo und Zyklusdauer werden aus dem Blender-Skript gelesen); 89 Tests, beide Simulationen und die Render-Prüfung im Mobile-Renderer grün.
+- Nicht belegt: Aussehen am iPhone. Animationen sind **noch nicht perfektioniert** (nach Freigabe der Figur).
+
+
 ## 2026-11-24 – Laufanimation neu (Branch `claude/cartoon-vorbereitung`)
 - Anlass: Nutzer meldet nach Build 6, dass die Laufanimation komisch aussieht. Befund aus den Aufnahmen: Schal stand fast senkrecht, Füße rutschten (Zyklus 0,6 s passte nicht zu 6,5 m/s), Gang wie ein Ausfallschritt ohne Flugphase.
 - Neuer Laufzyklus im Blender-Skript: Fußführung per Zwei-Gelenk-Berechnung. Der Standfuß wandert exakt mit der Laufgeschwindigkeit nach hinten (gemessen 6,50 m/s bei Soll 6,5, also kein Rutschen), Zyklus 0,57 s, Bodenkontakt 0,11 s je Fuß mit Flugphase, Hüfte federt 3,5 bis 11 cm ein, Knie bis 109 Grad, Schal weht fast waagerecht, Arme gebeugt im Gegentakt, leichte Vorlage.

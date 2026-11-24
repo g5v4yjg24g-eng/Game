@@ -10,7 +10,7 @@ Jede Phase endet mit einem getesteten Stand und einem Eintrag im [Changelog](CHA
 | 4 Kampf | Angriff, Verteidigung, Ausweichen, Gegner-KI, Animationen | offen |
 | 5 Spielwelt | Landschaft, Gebäude, NPCs, interaktive Objekte | offen |
 | 6 Fortschritt | Missionen, Inventar, Fähigkeiten, Speichern | offen |
-| 3c Cartoon-Stil (neu, 2026-11-24) | Umrisse und flächige Schattierung als Shader, Figur nach Referenz umbauen, Welt anpassen; Kosten für Bildrate und Akku am Gerät messen | **Vorbereitung gebaut** (Shader, Schalter, Prüfungen; Branch `claude/cartoon-vorbereitung`), Test am Gerät offen. Siehe [STIL_CARTOON.md](STIL_CARTOON.md) |
+| 3c Cartoon-Stil (neu, 2026-11-24) | Umrisse und flächige Schattierung als Shader, Figur nach Referenz umbauen, Welt anpassen; Kosten für Bildrate und Akku am Gerät messen | **Vorbereitung gebaut** (Shader, Schalter, Prüfungen; Branch `claude/cartoon-vorbereitung`); **Figur erste Version nach Referenz gebaut** (2026-11-24), Feinschliff und Test am Gerät offen; danach Animationen perfektionieren. Siehe [STIL_CARTOON.md](STIL_CARTOON.md) |
 | 7 Design und Sound | Oberfläche (inkl. Einstellungen mit Kamera-Schieberegler), Effekte, Musik, Geräusche | offen |
 | 8 TestFlight | Native Builds, Performance, Fehler, Gerätetests | offen |
 | 9 Veröffentlichung | App-Store-Vorbereitung | offen |

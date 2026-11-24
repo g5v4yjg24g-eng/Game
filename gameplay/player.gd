@@ -74,10 +74,10 @@ func current_animation() -> StringName:
 func _build_collision() -> void:
 	var shape := CapsuleShape3D.new()
 	shape.radius = 0.3
-	shape.height = 1.8
+	shape.height = 1.45
 	var body := CollisionShape3D.new()
 	body.shape = shape
-	body.position.y = 0.9
+	body.position.y = 0.725
 	add_child(body)
 
 

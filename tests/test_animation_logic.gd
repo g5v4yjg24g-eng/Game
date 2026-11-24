@@ -4,9 +4,16 @@ extends RefCounted
 
 func run(t: Object) -> void:
 	t.check(AnimationLogic.pick(true, 0, 0, false, 0, 0) == AnimationLogic.IDLE, "Stehen: idle")
-	t.check(AnimationLogic.pick(true, 0, 6.5, false, 0, 0) == AnimationLogic.RUN, "Laufen: run")
 	t.check(
-		AnimationLogic.pick(true, 0, 2.4, true, 0, 0) == AnimationLogic.SNEAK, "Schleichen: sneak"
+		AnimationLogic.pick(true, 0, ControlsConfig.RUN_SPEED, false, 0, 0) == AnimationLogic.RUN,
+		"Laufen: run"
+	)
+	t.check(
+		(
+			AnimationLogic.pick(true, 0, ControlsConfig.SNEAK_SPEED, true, 0, 0)
+			== AnimationLogic.SNEAK
+		),
+		"Schleichen: sneak"
 	)
 	t.check(
 		AnimationLogic.pick(true, 0, 0, true, 0, 0) == AnimationLogic.SNEAK_IDLE,
@@ -42,7 +49,9 @@ func run(t: Object) -> void:
 	t.check(not AnimationLogic.should_land(0.6, 6.0), "Landen im Lauf: keine Landeanimation")
 
 	t.check(
-		is_equal_approx(AnimationLogic.playback_speed(AnimationLogic.RUN, 6.5), 1.0),
+		is_equal_approx(
+			AnimationLogic.playback_speed(AnimationLogic.RUN, ControlsConfig.RUN_SPEED), 1.0
+		),
 		"Lauftempo: Faktor 1"
 	)
 	t.check(
@@ -53,7 +62,9 @@ func run(t: Object) -> void:
 		AnimationLogic.playback_speed(AnimationLogic.RUN, 20.0) <= 1.15, "Laufen schnell: begrenzt"
 	)
 	t.check(
-		is_equal_approx(AnimationLogic.playback_speed(AnimationLogic.SNEAK, 2.4), 1.0),
+		is_equal_approx(
+			AnimationLogic.playback_speed(AnimationLogic.SNEAK, ControlsConfig.SNEAK_SPEED), 1.0
+		),
 		"Schleichtempo: Faktor 1"
 	)
 	t.check(
@@ -81,9 +92,16 @@ func run(t: Object) -> void:
 			t.check(player.has_animation(clip), "Animation '%s' ist im Modell" % clip)
 		var run_clip := player.get_animation(&"run")
 		t.check(run_clip.loop_mode == Animation.LOOP_LINEAR, "run wiederholt sich")
-		t.check(
-			absf(run_clip.length - 17.0 / 30.0) < 0.01,
-			"run dauert 17 Bilder (%.3f s)" % run_clip.length
-		)
+		var frames := RegEx.create_from_string("(?m)^RUN_FRAMES = ([0-9]+)").search(script_text)
+		t.check(frames != null, "Blender-Skript nennt RUN_FRAMES")
+		if frames != null:
+			var expected := frames.get_string(1).to_float() / 30.0
+			t.check(
+				absf(run_clip.length - expected) < 0.01,
+				(
+					"run dauert RUN_FRAMES Bilder (%.3f s, erwartet %.3f s)"
+					% [run_clip.length, expected]
+				)
+			)
 		t.check(player.get_animation(&"jump").loop_mode == Animation.LOOP_NONE, "jump läuft einmal")
 	model.free()

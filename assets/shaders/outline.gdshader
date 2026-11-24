@@ -14,7 +14,8 @@ uniform float max_scale = 4.0;
 void vertex() {
 	float depth = max(-(MODELVIEW_MATRIX * vec4(VERTEX, 1.0)).z, 0.1);
 	float scale = clamp(depth / reference_distance, min_scale, max_scale);
-	VERTEX += normalize(NORMAL) * width * scale;
+	// COLOR.r = Breitenfaktor je Punkt (dünne Teile der Figur); ohne Farbe ist COLOR weiß, also 1.
+	VERTEX += normalize(NORMAL) * width * scale * COLOR.r;
 }
 
 void fragment() {

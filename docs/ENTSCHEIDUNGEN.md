@@ -9,7 +9,7 @@
 | Bundle-ID | Entschieden | `com.fangpunkt.game` |
 | Repository | Entschieden | Alles unter `g5v4yjg24g-eng/Game`; Angelkarte-Deutschland und fangpunkt_webside bleiben unberührt |
 | Story | Entschieden | Auftragsmörder: erst blinder Gehorsam, dann wachsendes Hinterfragen des Auftraggebers (2026-11-24) |
-| Zielrichtung Figur | Entschieden als Richtung (Nutzer 2026-11-24, Referenzbild), Umbau **nach dem Test des Zwischenstands** | Siehe Abschnitt „Zielrichtung Figur“ unten. Die jetzige Figur ist eine Zwischenstufe. |
+| Zielrichtung Figur | Entschieden als Richtung (Nutzer 2026-11-24, Referenzbild). **Umbau begonnen:** erste Version steht (2026-11-24), Feinschliff nach Rückmeldung; Animationen werden danach perfektioniert (Wunsch Nutzer: erst die Figur, dann die Animationen) | Siehe Abschnitt „Zielrichtung Figur“ unten. Die jetzige Figur ist eine Zwischenstufe. |
 | Spielfigur | Vorläufig (Vorschlag von Claude, Nutzer prüft im Test) | Eigenes stilisiertes Modell (etwa 7 000 Dreiecke, dunkelblauer Stoff, roter Schal und Gürtel, Schwert auf dem Rücken), per Skript in Blender erzeugt, ersetzt die Platzhalterfigur. Nur Version 1: Proportionen, Farben und Details sind änderbar. |
 | Stil-Testknopf „Stil“ | Vorläufig (Claude, nur für die Prüfphase) | Kleiner Knopf oben rechts schaltet den Cartoon-Stil an und aus, damit der Nutzer am Gerät vergleichen kann. Standard aus; verschwindet, sobald der Stil in den Einstellungen liegt. |
 | Touch-Steuerung | Entschieden (Nutzer 2026-11-24: „wie geplant“) | Schwebender Joystick links (Mitte dort, wo der Daumen aufsetzt), Kamera per Wischen in der rechten Hälfte |
@@ -47,3 +47,11 @@ Folgen und offene Fragen (noch nicht entschieden):
 - **Offen:** Welche fiktiven Figuren und Wesen später vorkommen (Nutzer nennt das als Richtung, Einzelheiten folgen); Farbpalette und Lichtstimmung für ernste Szenen.
 - Technisch möglich (Godot, Mobile): Umrisse (Zusatznetz oder Nachbearbeitung) und flächige Schattierung per Shader. Kosten für Bildrate und Akku sind am Gerät zu messen.
 - Umbau im Blender-Skript: Proportionen, Stirnband mit Schweif, Schulter- und Knieschützer, größere Augen (Gesicht als eigene Form oder einfache Textur), Fäuste.
+
+## Skalierung durch den Chibi-Umbau (Vorschlag von Claude, vorläufig, 2026-11-24)
+Die neue Figur ist 1,45 m statt 1,85 m groß (Kopf breiter als die Schultern, kurze Beine). Damit Lauf und Kamera dazu passen, wurden die Spielwerte um etwa 20 % verkleinert; alle stehen in `core/controls_config.gd` und lassen sich zurückstellen:
+- Lauftempo 6,5 → **5,2 m/s** (bei den kürzeren Beinen sind 6,5 m/s nur mit unnatürlich kurzem Bodenkontakt sauber zu laufen), Schleichtempo 2,4 → **1,9 m/s**
+- Kamera-Abstand 5,0 → **4,0 m**, Zielhöhe 1,5 → **1,15 m**
+- Kollisionsform der Figur 1,8 → **1,45 m** hoch
+- **Unverändert:** Sprungstärke (Sprung 1,1 m hoch, im Chibi-Stil bewusst hoch), Beschleunigung, Drehgeschwindigkeit
+- Laufanimation nach Rückmeldung des Nutzers („Knie gehen zu weit hoch, wie eine Sportübung“): Kniebeugung von bis zu 109 auf **bis zu 73 Grad** gesenkt.

@@ -22,16 +22,14 @@ technisch vorbereitet ist, was gemessen wurde und was noch zu entscheiden ist.
 | Stahl | helles Grau `#AEB3BC` |
 | Umriss | `#0A0A12` |
 
-## Figur nach Referenz (noch nicht umgesetzt)
-Chibi-Proportionen mit großem Kopf und kompaktem Körper, Kapuze mit Maske, große ausdrucksstarke Augen,
-rotes Stirnband mit flatternden Enden, rote Schulterpolster, Gürtel und Knieschützer, kräftige Fäuste,
-Kampfhaltung. Das Bild ist Stilvorlage, nicht Vorlage zum Kopieren. Fiktive Figuren und Wesen folgen derselben
-Formensprache (Proportionen, Umriss, Palette) und werden erst als Konzept abgestimmt.
+## Figur nach Referenz (erste Version, 2026-11-24)
+Gebaut mit `tools/blender/build_ninja.py`, 1,45 m groß, Chibi-Proportionen. Enthalten: großer runder Kopf (breiter als die Schultern), Kapuze mit Gesicht und Maske, **große Augen mit zornigen Brauen**, rotes Stirnband mit seitlichen Spitzen und flatternden Enden, rote Schulterpolster, Gürtel mit Knoten, überkreuzter Kragen, rote Knieschützer, Fäuste in Hautfarbe, Stiefel, Schwert auf dem Rücken.
+Das Bild des Nutzers ist Stilvorlage, nicht Vorlage zum Kopieren; die Figur ist eine eigene Konstruktion. **Noch offen:** Feinschliff nach Rückmeldung (Proportionen, Farbe, Gesicht), Kampfhaltung als Ruhepose, Gesicht mit Textur statt reiner Flächen. Fiktive Figuren und Wesen folgen später derselben Formensprache und werden erst als Konzept abgestimmt.
 
 ## Was technisch vorbereitet ist
 - **Shader** `assets/shaders/toon.gdshader` (drei Stufen) und `assets/shaders/outline.gdshader` (Inverted Hull, Breite wächst mit dem Abstand). Beide laufen im **Mobile-Renderer**.
 - **`world/style/cartoon_style.gd`** schaltet den Stil über `EventBus.style_changed`. Aus: Materialien unverändert. An: Toon-Material und Umrisse.
-- **Umrisse:** Die Figur bringt ein eigenes Umriss-Mesh mit (`NinjaUmriss`, geglättete Normalen, am selben Skelett). Statische Teile bekommen ein Umriss-Netz mit gemittelten Normalen (`world/style/smooth_normals.gd`, mit Tests). Boden und Weg haben bewusst keinen Umriss, Umrisse weiter als 45 m werden nicht gezeichnet.
+- **Umrisse:** Die Figur bringt ein eigenes Umriss-Mesh mit (`NinjaUmriss`, geglättete Normalen, am selben Skelett). Dünne Teile (Stirnband-Enden, Schwert) tragen einen kleineren Breitenfaktor in der Vertexfarbe (Rot-Kanal), sonst wäre ihr Umriss unverhältnismäßig dick. Statische Teile bekommen ein Umriss-Netz mit gemittelten Normalen (`world/style/smooth_normals.gd`, mit Tests). Boden und Weg haben bewusst keinen Umriss, Umrisse weiter als 45 m werden nicht gezeichnet.
 - **Testknopf „Stil“** oben rechts (nur für die Prüfphase), Anzeige „Stil: normal/Cartoon“ in der Messanzeige. Standard ist **aus**.
 - **Prüfung:** Tests für die Normalen-Rechnung und den Knopf, Simulation für Ein- und Ausschalten, und ein CI-Job `mobile-renderer`, der den Prototyp mit Cartoon-Stil im echten Mobile-Renderer (Software-Vulkan) rendert und Shader-Fehler meldet.
 
@@ -53,7 +51,7 @@ Der Testknopf macht den Vergleich am Gerät möglich.
 
 ## Bekannte Grenzen
 - Nebel und Dämmerlicht der Testwelt machen die Umrisse blass und die Szene matschig. Für den Stil braucht die Welt eine eigene Farb- und Lichtabstimmung (offen).
-- Die jetzige Figur ist dunkelblau auf dunklem Boden und nicht im Referenzstil; sie liest sich im Cartoon-Modus schwach.
+- Die Figur ist im Abend- und Nebellicht der Testwelt dunkel und klein; ohne eigene Licht- und Farbabstimmung der Welt liest sie sich im Cartoon-Modus schwach.
 - Der Umriss der Figur verdoppelt die Skinning-Arbeit (3 844 Punkte zusätzlich), unkritisch, aber zu messen.
 - Dünne Teile (Schal, Schwertscheide) bekommen eine gleich breite Linie und wirken dadurch kräftiger.
 - Augen und Gesicht brauchen später eine kleine Textur oder eigene Geometrie; reine Flächenfarben reichen für den Ausdruck im Referenzbild nicht.
@@ -61,7 +59,7 @@ Der Testknopf macht den Vergleich am Gerät möglich.
 ## Nächste Schritte
 1. Am iPhone mit dem Testknopf vergleichen: Aussehen, Bildrate, Akku (nur der Nutzer kann das prüfen).
 2. Entscheidungen: Nebel und Lichtstimmung, endgültige Palette, Umrissbreite.
-3. Figur nach Referenz im Blender-Skript umbauen (Phase 3c).
+3. Figur: erste Version steht; Feinschliff nach Rückmeldung, danach Animationen perfektionieren (Phase 3c).
 4. Welt-Teile im Stil neu aufbauen (Gebäude, Bäume, Gelände).
 5. Oberfläche im Stil.
 6. Stil in die Einstellungen (Schalter) und Standard auf „an“ stellen, sobald er überzeugt.

@@ -9,8 +9,8 @@ uniform vec4 albedo : source_color = vec4(1.0);
 uniform float mid_threshold : hint_range(0.0, 1.0) = 0.15;
 uniform float light_threshold : hint_range(0.0, 1.0) = 0.55;
 // Helligkeit der Mittel- und Lichtstufe als Anteil des Sonnenlichts.
-uniform float mid_strength : hint_range(0.0, 1.0) = 0.5;
-uniform float light_strength : hint_range(0.0, 2.0) = 1.0;
+uniform float mid_strength : hint_range(0.0, 1.0) = 0.38;
+uniform float light_strength : hint_range(0.0, 2.0) = 0.7;
 // Weicher Übergang der Kanten (klein = hart). Etwas Weichheit verhindert Flimmern.
 uniform float edge_softness : hint_range(0.001, 0.2) = 0.015;
 
