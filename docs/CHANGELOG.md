@@ -6,6 +6,7 @@
 - `gameplay/animation_logic.gd` wählt die Animation (19 neue Tests, insgesamt 64); die Simulation prüft die Zuordnung und die Folge jump → fall → land.
 - Die `.glb` liegt in Git LFS; Lizenzvermerk und Anleitung zum Neuerzeugen unter `assets/characters/ninja` und `tools/blender`.
 - Noch nicht am iPhone gesehen.
+- Zielrichtung für die Figur festgehalten (Referenzbild des Nutzers: Chibi-Cartoon-Ninja mit rotem Stirnband); Umbau später (docs/ENTSCHEIDUNGEN.md).
 
 ## 2026-11-24 – Phase 3 (Prototyp), Branch `claude/phase-3-prototyp`
 - Spielbarer Prototyp: Testwelt aus Code, Platzhalterfigur, Kamera mit Hinderniserkennung, Bewegung relativ zur Kamera, Sprung, Schleichen.

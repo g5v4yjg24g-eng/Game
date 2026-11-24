@@ -9,6 +9,7 @@
 | Bundle-ID | Entschieden | `com.fangpunkt.game` |
 | Repository | Entschieden | Alles unter `g5v4yjg24g-eng/Game`; Angelkarte-Deutschland und fangpunkt_webside bleiben unberührt |
 | Story | Entschieden | Auftragsmörder: erst blinder Gehorsam, dann wachsendes Hinterfragen des Auftraggebers (2026-11-24) |
+| Zielrichtung Figur | Entschieden als Richtung (Nutzer 2026-11-24, Referenzbild), Umbau **später** | Siehe Abschnitt „Zielrichtung Figur“ unten. Die jetzige Figur ist eine Zwischenstufe. |
 | Spielfigur | Vorläufig (Vorschlag von Claude, Nutzer prüft im Test) | Eigenes stilisiertes Modell (etwa 7 000 Dreiecke, dunkelblauer Stoff, roter Schal und Gürtel, Schwert auf dem Rücken), per Skript in Blender erzeugt, ersetzt die Platzhalterfigur. Nur Version 1: Proportionen, Farben und Details sind änderbar. |
 | Touch-Steuerung | Entschieden (Nutzer 2026-11-24: „wie geplant“) | Schwebender Joystick links (Mitte dort, wo der Daumen aufsetzt), Kamera per Wischen in der rechten Hälfte |
 | Sprung- und Schleichknopf | Vorläufig | Knöpfe rechts unten; Schleichen ist ein Umschalter (Vorschlag von Claude) |
@@ -30,3 +31,16 @@
 | Testgerät | Entschieden | iPhone 16 Pro Max, iOS 27.2.1 (2026-11-24). Leistungsziele werden an diesem Gerät gemessen; ältere Geräte später prüfen |
 | Mindest-iOS | **Offen** | Preset steht vorläufig auf iOS 15.0; endgültiger Wert hängt von der Zielgruppe ab |
 | Zusammenarbeit mit weiteren Entwicklern | **Offen** | Bestimmt Branch-Schutz und Review-Regeln |
+
+## Zielrichtung Figur (Referenzbild des Nutzers, 2026-11-24)
+Der Nutzer wünscht sich, dass die Ninja-Figur in Zukunft **ähnlich wie ein Referenzbild** aussieht; umgebaut wird erst später. Das Bild ist eine Stimmungs- und Stilvorlage, **kein Vorbild zum Kopieren** und liegt nicht im Repo (Rechte unbekannt). Merkmale des Bildes:
+- **Chibi-/Cartoon-Proportionen:** großer Kopf, kompakter Körper, kräftige Hände (Fäuste), breite Kampfhaltung.
+- **Kapuze mit Maske** über Nase und Mund, **große, ausdrucksstarke Augen** (zusammengezogene Brauen).
+- **Rotes Stirnband** mit flatternden Enden, dazu rote Akzente: **Schulterpolster, Gürtel, Knieschützer**.
+- Dunkelgraue bis schwarze Kleidung, überkreuzter Wickel-Kragen.
+- **Flächiger Cartoon-Look** mit dicken dunklen Umrissen und wenigen Schattenstufen.
+
+Folgen und offene Fragen (noch nicht entschieden):
+- Der Stil weicht vom ursprünglichen Wunsch „stilisiert-realistisch“ und vom ernsten Ton der Story (Auftragsmörder) ab. **Offen:** Soll nur die Figur im Cartoon-Stil sein, oder das ganze Spiel (Welt, Gegner, Oberfläche)? Empfehlung von Claude: erst die Figur, die Welt bleibt stilisiert, danach gemeinsam entscheiden.
+- Technisch möglich (Godot, Mobile): Umrisse (Zusatznetz oder Nachbearbeitung) und flächige Schattierung per Shader. Kosten für Bildrate und Akku sind am Gerät zu messen.
+- Umbau im Blender-Skript: Proportionen, Stirnband mit Schweif, Schulter- und Knieschützer, größere Augen (Gesicht als eigene Form oder einfache Textur), Fäuste.
