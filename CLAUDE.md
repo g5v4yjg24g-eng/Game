@@ -23,7 +23,8 @@ Spieltexte, Doku und Commit-Nachrichten **Deutsch**, Code-Bezeichner Englisch. S
 ## Testen ohne Gerät
 - Reine Logik: `tests/test_*.gd` (läuft mit `--script`, kennt **keine Autoloads**, also nie `EventBus` oder Szenen laden).
 - Zusammenspiel: Simulationen als Szene (`tests/sim_*.tscn`), mit Autoloads. Headless hat das Fenster die Größe 0; Touch-Ereignisse deshalb direkt an `TouchControls._input` schicken, nicht über `Input.parse_input_event`.
-- Screenshots gehen nur mit Software-OpenGL unter `xvfb-run` und dem Compatibility-Renderer. Farben und Bildrate sind dort nicht aussagekräftig für das iPhone.
+- **Echter Mobile-Renderer ohne GPU:** `apt-get install xvfb mesa-vulkan-drivers vulkan-tools`, dann `VK_ICD_FILENAMES=/usr/share/vulkan/icd.d/lvp_icd.json xvfb-run -a godot --path . --rendering-method mobile --rendering-driver vulkan <Szene>` (Vulkan über llvmpipe). Shader-Fehler erscheinen als `SHADER ERROR` und lassen das Skript trotzdem durchlaufen, die Ausgabe muss ausgewertet werden (CI-Job `mobile-renderer`). **Draw Calls und Objekte** sind ein brauchbarer Maßstab, aber etwa 10 % zu hoch (Build 5: 145/221 hier gegen 130/206 am iPhone); **Bildraten und Akku sagt es nicht**.
+- Screenshots: bevorzugt im Mobile-Renderer (siehe oben), nur im Notfall mit dem Compatibility-Renderer. Farben wirken im Compatibility-Renderer anders.
 - Spielgefühl, Bildrate und Safe Area prüft nur der Nutzer am Gerät.
 
 ## Arbeitsweise

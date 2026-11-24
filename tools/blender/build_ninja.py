@@ -243,6 +243,32 @@ def build_geometry():
     return obj
 
 
+def build_outline(mesh_obj):
+    """Zweites Mesh für den Cartoon-Umriss: gleiche Form, aber überall geglättete Normale.
+
+    Godot zeichnet es mit einem Shader, der die Fläche entlang der Normale aufbläht und nur die
+    Rückseiten zeigt (Inverted Hull). Mit geglätteten Normalen entstehen an Kanten keine Lücken.
+    Das Mesh hängt am selben Skelett und bewegt sich mit.
+    """
+    mesh = mesh_obj.data.copy()
+    mesh.name = "NinjaUmrissMesh"
+    mesh.materials.clear()
+    material = bpy.data.materials.new("umriss")
+    material.use_nodes = True
+    material.node_tree.nodes["Principled BSDF"].inputs["Base Color"].default_value = (0.04, 0.04, 0.07, 1.0)
+    mesh.materials.append(material)
+    for poly in mesh.polygons:
+        poly.material_index = 0
+        poly.use_smooth = True
+    normals = [tuple(mesh.vertex_normals[loop.vertex_index].vector) for loop in mesh.loops]
+    mesh.normals_split_custom_set(normals)
+    obj = bpy.data.objects.new("NinjaUmriss", mesh)
+    bpy.context.scene.collection.objects.link(obj)
+    for group in mesh_obj.vertex_groups:
+        obj.vertex_groups.new(name=group.name)
+    return obj
+
+
 def build_armature():
     arm = bpy.data.armatures.new("NinjaSkelett")
     obj = bpy.data.objects.new("NinjaSkelett", arm)
@@ -542,6 +568,9 @@ def render_pose(rig, cam, action, frame, view, path):
 
 def make_previews(rig, actions, folder):
     os.makedirs(folder, exist_ok=True)
+    for obj in bpy.data.objects:
+        if obj.name == "NinjaUmriss":
+            obj.hide_render = True
     cam = setup_render(330, 420)
     shots = [
         ("idle-loop", 0, "vorn"),
@@ -594,6 +623,10 @@ def main():
     mesh_obj.parent = arm_obj
     modifier = mesh_obj.modifiers.new("Skelett", "ARMATURE")
     modifier.object = arm_obj
+    outline_obj = build_outline(mesh_obj)
+    outline_obj.parent = arm_obj
+    outline_mod = outline_obj.modifiers.new("Skelett", "ARMATURE")
+    outline_mod.object = arm_obj
 
     bpy.context.view_layer.objects.active = arm_obj
     bpy.ops.object.mode_set(mode="POSE")
@@ -605,7 +638,7 @@ def main():
         make_previews(rig, actions, preview)
     export_glb(out)
     tris = sum(len(p.vertices) - 2 for p in mesh_obj.data.polygons)
-    print(f"Fertig: {out} – {len(mesh_obj.data.vertices)} Punkte, {tris} Dreiecke, {len(actions)} Animationen")
+    print(f"Fertig: {out} – {len(mesh_obj.data.vertices)} Punkte, {tris} Dreiecke (Umriss-Mesh zusätzlich), {len(actions)} Animationen")
 
 
 main()

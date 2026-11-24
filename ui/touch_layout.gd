@@ -3,7 +3,7 @@ extends RefCounted
 ## Aufteilung des Bildschirms: Knöpfe rechts unten, links schwebender Joystick,
 ## rechte Hälfte steuert die Kamera. Reine Logik, berücksichtigt die Safe Area.
 
-enum Zone { JOYSTICK, LOOK, JUMP, SNEAK }
+enum Zone { JOYSTICK, LOOK, JUMP, SNEAK, STYLE }
 
 
 ## Mittelpunkt eines Knopfes. [param insets] = {left, top, right, bottom} in Oberflächenpixeln.
@@ -17,6 +17,12 @@ static func button_center(button: Zone, size: Vector2, insets: Dictionary) -> Ve
 		return jump
 	if button == Zone.SNEAK:
 		return jump - Vector2(2.0 * r + ControlsConfig.BUTTON_GAP, 0.0)
+	if button == Zone.STYLE:
+		var s := ControlsConfig.STYLE_BUTTON_RADIUS
+		return Vector2(
+			size.x - float(insets["right"]) - ControlsConfig.BUTTON_MARGIN - s,
+			float(insets["top"]) + ControlsConfig.BUTTON_MARGIN + s
+		)
 	return Vector2.ZERO
 
 
@@ -35,9 +41,16 @@ static func joystick_hint(size: Vector2, insets: Dictionary) -> Vector2:
 
 ## Bestimmt, welche Funktion eine Berührung an [param position] auslöst.
 static func zone_at(position: Vector2, size: Vector2, insets: Dictionary) -> Zone:
-	var hit := ControlsConfig.BUTTON_RADIUS * ControlsConfig.BUTTON_HIT_SCALE
-	for button: Zone in [Zone.JUMP, Zone.SNEAK]:
-		if position.distance_to(button_center(button, size, insets)) <= hit:
+	for button: Zone in [Zone.JUMP, Zone.SNEAK, Zone.STYLE]:
+		var radius := (
+			ControlsConfig.STYLE_BUTTON_RADIUS
+			if button == Zone.STYLE
+			else ControlsConfig.BUTTON_RADIUS
+		)
+		if (
+			position.distance_to(button_center(button, size, insets))
+			<= radius * ControlsConfig.BUTTON_HIT_SCALE
+		):
 			return button
 	if position.x < size.x * ControlsConfig.SCREEN_SPLIT:
 		return Zone.JOYSTICK

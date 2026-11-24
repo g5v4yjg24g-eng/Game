@@ -7,10 +7,12 @@ extends Node
 
 var _failed := 0
 var _controls: TouchControls
+var _scene: Node
 
 
 func _ready() -> void:
-	var scene: Node = load("res://scenes/prototype.tscn").instantiate()
+	_scene = load("res://scenes/prototype.tscn").instantiate()
+	var scene := _scene
 	add_child(scene)
 	var player: Player = null
 	var rig: CameraRig = null
@@ -96,6 +98,30 @@ func _ready() -> void:
 	)
 	_touch(0, start, false)
 
+	# Stil-Knopf: Cartoon an und wieder aus
+	var style_center := TouchLayout.button_center(TouchLayout.Zone.STYLE, size, none)
+	var style: CartoonStyle = null
+	for child in scene.get_children():
+		if child is CartoonStyle:
+			style = child
+	_check(style != null and not style.enabled, "Cartoon-Stil ist zu Beginn aus")
+	_check(_toon_count() == 0, "Zu Beginn kein Toon-Material (%d)" % _toon_count())
+	_touch(4, style_center, true)
+	_touch(4, style_center, false)
+	await _frames(3)
+	_check(style.enabled, "Stil-Knopf schaltet den Cartoon-Stil ein")
+	_check(_toon_count() > 50, "Toon-Material an Figur und Welt (%d Netze)" % _toon_count())
+	_check(_visible_outlines() > 50, "Umrisse sichtbar (%d)" % _visible_outlines())
+	_touch(4, style_center, true)
+	_touch(4, style_center, false)
+	await _frames(3)
+	_check(not style.enabled, "Stil-Knopf schaltet den Cartoon-Stil wieder aus")
+	_check(_toon_count() == 0, "Nach dem Ausschalten kein Toon-Material mehr (%d)" % _toon_count())
+	_check(
+		_visible_outlines() == 0,
+		"Nach dem Ausschalten keine sichtbaren Umrisse (%d)" % _visible_outlines()
+	)
+
 	print("Touch-Simulation: %s" % ("alles bestanden" if _failed == 0 else "%d Fehler" % _failed))
 	get_tree().quit(1 if _failed > 0 else 0)
 
@@ -127,3 +153,28 @@ func _check(condition: bool, description: String) -> void:
 	else:
 		_failed += 1
 		printerr("  FEHLER ", description)
+
+
+func _toon_count() -> int:
+	var count := 0
+	for node in _scene.find_children("*", "MeshInstance3D", true, false):
+		var mi := node as MeshInstance3D
+		if mi.material_override is ShaderMaterial and mi.name != "CartoonOutline":
+			if not str(mi.name).ends_with("Umriss"):
+				count += 1
+				continue
+		for i in mi.get_surface_override_material_count():
+			if mi.get_surface_override_material(i) is ShaderMaterial:
+				count += 1
+				break
+	return count
+
+
+func _visible_outlines() -> int:
+	var count := 0
+	for node in _scene.find_children("*", "MeshInstance3D", true, false):
+		var mi := node as MeshInstance3D
+		var is_outline := mi.name == "CartoonOutline" or str(mi.name).ends_with("Umriss")
+		if is_outline and mi.visible:
+			count += 1
+	return count

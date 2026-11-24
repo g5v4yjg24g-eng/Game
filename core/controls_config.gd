@@ -14,6 +14,8 @@ const BUTTON_RADIUS := 52.0
 const BUTTON_MARGIN := 36.0
 const BUTTON_GAP := 24.0
 const BUTTON_HIT_SCALE := 1.25
+## Kleiner Testknopf oben rechts (Cartoon-Stil an/aus), nur solange der Stil geprüft wird.
+const STYLE_BUTTON_RADIUS := 30.0
 
 # Kamera
 const MIN_PITCH_DEG := -65.0

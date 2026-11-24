@@ -1,5 +1,13 @@
 # Changelog
 
+## 2026-11-24 – Vorbereitung Cartoon-Stil (Branch `claude/cartoon-vorbereitung`)
+- Shader für Cartoon-Schattierung (drei Stufen) und Umriss (Inverted Hull), beide für den Mobile-Renderer; Standard **aus**.
+- `CartoonStyle` schaltet Figur und Welt um; Figur mit eigenem Umriss-Mesh im Modell, statische Teile mit gemittelten Normalen (`SmoothNormals`, mit Tests).
+- Testknopf „Stil“ oben rechts und Stilanzeige in der Messanzeige, damit der Nutzer am iPhone vergleichen kann.
+- Prüfungen: 75 Logik-Tests, Simulation für Ein- und Ausschalten, neuer CI-Job `mobile-renderer` (echter Mobile-Renderer per Software-Vulkan, meldet Shader-Fehler).
+- Stil-Leitfaden `docs/STIL_CARTOON.md` mit Regeln, Messungen (Draw Calls im Cartoon-Modus etwa 20 bis 45 % höher) und offenen Punkten.
+- Noch nicht am iPhone gesehen; Figur und Welt sind noch nicht im Referenzstil umgebaut.
+
 ## 2026-11-24 – Ninja-Modell (Branch `claude/ninja-modell`)
 - Neue Spielfigur statt Platzhalter: eigenes Modell aus `tools/blender/build_ninja.py` (Skelett mit 21 Knochen, Schal-Kette, etwa 7 000 Dreiecke).
 - Sieben Animationen: `idle`, `run`, `sneak`, `sneak_idle`, `jump`, `fall`, `land`; Tempo der Schritte passt sich der Geschwindigkeit an, weiche Übergänge.
