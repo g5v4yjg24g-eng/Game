@@ -41,6 +41,8 @@ Nachtrag Phase 3b (Branch `claude/ninja-modell`):
 - [x] Animationsauswahl als reine Logik mit Tests (`gameplay/animation_logic.gd`), Anbindung an die Figur, Simulation prüft idle/run/sneak und jump → fall → land
 - [ ] Am iPhone gesehen und bewertet (Aussehen, Animationen, Bildrate mit Modell) – nur der Nutzer kann das prüfen
 
+- [x] Laufanimation überarbeitet (2026-11-24, siehe Changelog); am Gerät zu prüfen
+
 Bewusst noch nicht enthalten: Gehen (nur Laufen und Schleichen), Lock-on-Kamera, Kampf (Phase 4), Gesichts- und Stoffdetails, Texturen. Die Figur ist ein stilisiertes Modell aus glatten Grundformen, keine Charakterkunst in Studioqualität.
 
 ## Messwerte

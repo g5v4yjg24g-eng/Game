@@ -60,3 +60,30 @@ func run(t: Object) -> void:
 		is_equal_approx(AnimationLogic.playback_speed(AnimationLogic.IDLE, 0.0), 1.0),
 		"Stehen: Faktor 1"
 	)
+
+	# Laufzyklus: Entwurfstempo im Blender-Skript muss zum Spiel passen, sonst rutschen die Füße
+	var script_text := FileAccess.get_file_as_string("res://tools/blender/build_ninja.py")
+	var regex := RegEx.create_from_string("(?m)^RUN_SPEED = ([0-9.]+)")
+	var found := regex.search(script_text)
+	t.check(found != null, "Blender-Skript nennt das Entwurfstempo RUN_SPEED")
+	if found != null:
+		t.check(
+			is_equal_approx(found.get_string(1).to_float(), ControlsConfig.RUN_SPEED),
+			"Entwurfstempo im Blender-Skript (%s) = RUN_SPEED im Spiel" % found.get_string(1)
+		)
+
+	# Importierte Animationen: Namen, Wiederholung und Länge des Laufzyklus
+	var model := (load("res://assets/characters/ninja/ninja.glb") as PackedScene).instantiate()
+	var player := model.find_child("AnimationPlayer", true, false) as AnimationPlayer
+	t.check(player != null, "Modell enthält einen AnimationPlayer")
+	if player != null:
+		for clip in [&"idle", &"run", &"sneak", &"sneak_idle", &"jump", &"fall", &"land"]:
+			t.check(player.has_animation(clip), "Animation '%s' ist im Modell" % clip)
+		var run_clip := player.get_animation(&"run")
+		t.check(run_clip.loop_mode == Animation.LOOP_LINEAR, "run wiederholt sich")
+		t.check(
+			absf(run_clip.length - 17.0 / 30.0) < 0.01,
+			"run dauert 17 Bilder (%.3f s)" % run_clip.length
+		)
+		t.check(player.get_animation(&"jump").loop_mode == Animation.LOOP_NONE, "jump läuft einmal")
+	model.free()

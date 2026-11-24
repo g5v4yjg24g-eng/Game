@@ -1,5 +1,12 @@
 # Changelog
 
+## 2026-11-24 – Laufanimation neu (Branch `claude/cartoon-vorbereitung`)
+- Anlass: Nutzer meldet nach Build 6, dass die Laufanimation komisch aussieht. Befund aus den Aufnahmen: Schal stand fast senkrecht, Füße rutschten (Zyklus 0,6 s passte nicht zu 6,5 m/s), Gang wie ein Ausfallschritt ohne Flugphase.
+- Neuer Laufzyklus im Blender-Skript: Fußführung per Zwei-Gelenk-Berechnung. Der Standfuß wandert exakt mit der Laufgeschwindigkeit nach hinten (gemessen 6,50 m/s bei Soll 6,5, also kein Rutschen), Zyklus 0,57 s, Bodenkontakt 0,11 s je Fuß mit Flugphase, Hüfte federt 3,5 bis 11 cm ein, Knie bis 109 Grad, Schal weht fast waagerecht, Arme gebeugt im Gegentakt, leichte Vorlage.
+- Neue Prüfungen: Entwurfstempo im Blender-Skript muss `RUN_SPEED` im Spiel entsprechen; alle sieben Animationen und die Länge des Laufzyklus werden aus dem importierten Modell geprüft (88 Tests insgesamt).
+- Nicht belegt: ob der Lauf am iPhone besser aussieht (nur der Nutzer kann das prüfen).
+
+
 ## 2026-11-24 – Vorbereitung Cartoon-Stil (Branch `claude/cartoon-vorbereitung`)
 - Shader für Cartoon-Schattierung (drei Stufen) und Umriss (Inverted Hull), beide für den Mobile-Renderer; Standard **aus**.
 - `CartoonStyle` schaltet Figur und Welt um; Figur mit eigenem Umriss-Mesh im Modell, statische Teile mit gemittelten Normalen (`SmoothNormals`, mit Tests).

@@ -54,6 +54,11 @@ for _n, _s in SIDES.items():
 
 THIGH_LEN = 0.44
 SHIN_LEN = 0.44
+HIP_HEIGHT = 0.98  # Höhe des Hüftknochens im Stand
+ANKLE_HEIGHT = 0.10  # Höhe des Knöchels (Fußknochen) im Stand
+# Entwurfstempo des Laufzyklus in m/s. Muss zu RUN_SPEED in core/controls_config.gd passen,
+# sonst rutschen die Füße.
+RUN_SPEED = 6.5
 
 
 # --- Geometrie ---------------------------------------------------------------------------------
@@ -368,27 +373,151 @@ def idle_pose(t):
     return pose
 
 
+# --- Laufzyklus mit Fußführung (Zwei-Gelenk-Berechnung) ----------------------------------------
+RUN_CYCLE_SECONDS = 17 / FPS  # beide Schritte, etwa 0,57 s (3,5 Schritte je Sekunde)
+RUN_CONTACT_SECONDS = 0.11  # Bodenkontakt je Fuß
+RUN_STANCE = RUN_CONTACT_SECONDS / RUN_CYCLE_SECONDS  # Anteil des Zyklus im Stand
+RUN_STRIDE_HALF = RUN_SPEED * RUN_CONTACT_SECONDS / 2  # Fuß vor und hinter der Hüfte im Stand
+RUN_LIFT = 0.26  # Fußhöhe in der Schwungphase
+RUN_TANGENT = 0.3  # Anteil der Standgeschwindigkeit, der in die Schwungkurve übergeht
+
+
+def leg_ik(y, z_rel):
+    """Beinwinkel für einen Knöchel an (y, z_rel) relativ zur Hüfte in der Seitenebene.
+
+    y: nach vorn positiv, z_rel: negativ unter der Hüfte. Rückgabe: (Oberschenkel, Kniebeugung,
+    erreicht) in Grad; "erreicht" ist False, wenn das Ziel zu weit weg war und gekürzt wurde.
+    """
+    reach = THIGH_LEN + SHIN_LEN - 1e-4
+    d = math.hypot(y, z_rel)
+    ok = d <= reach
+    d = min(d, reach)
+    cos_knee = (THIGH_LEN**2 + SHIN_LEN**2 - d**2) / (2 * THIGH_LEN * SHIN_LEN)
+    flex = math.pi - math.acos(max(-1.0, min(1.0, cos_knee)))
+    base = math.atan2(y, -z_rel)
+    cos_hip = (THIGH_LEN**2 + d**2 - SHIN_LEN**2) / (2 * THIGH_LEN * d)
+    thigh = base + math.acos(max(-1.0, min(1.0, cos_hip)))
+    return math.degrees(thigh), math.degrees(flex), ok
+
+
+def leg_foot(thigh_deg, flex_deg):
+    """Vorwärtsrechnung (Gegenprobe): Knöchelposition (y, z) relativ zur Hüfte."""
+    a = math.radians(thigh_deg)
+    b = a - math.radians(flex_deg)
+    return (
+        THIGH_LEN * math.sin(a) + SHIN_LEN * math.sin(b),
+        -(THIGH_LEN * math.cos(a) + SHIN_LEN * math.cos(b)),
+    )
+
+
+def run_foot(u):
+    """Knöchelweg eines Fußes über den Zyklus (u = 0 bis 1, 0 = Aufsetzen): (y, z, im Stand?).
+
+    Stand: Der Fuß liegt auf dem Boden und wandert mit genau der Laufgeschwindigkeit nach hinten
+    (kein Rutschen). Schwung: Hermite-Kurve zurück nach vorn mit angehobenem Fuß.
+    """
+    s = RUN_STANCE
+    if u < s:
+        tau = u / s
+        return RUN_STRIDE_HALF * (1.0 - 2.0 * tau), ANKLE_HEIGHT, True
+    tau = (u - s) / (1.0 - s)
+    duration = (1.0 - s) * RUN_CYCLE_SECONDS
+    p0, p1 = -RUN_STRIDE_HALF, RUN_STRIDE_HALF
+    m = -RUN_SPEED * duration * RUN_TANGENT
+    h00, h10 = 2 * tau**3 - 3 * tau**2 + 1, tau**3 - 2 * tau**2 + tau
+    h01, h11 = -2 * tau**3 + 3 * tau**2, tau**3 - tau**2
+    y = h00 * p0 + h10 * m + h01 * p1 + h11 * m
+    z = ANKLE_HEIGHT + RUN_LIFT * math.sin(math.pi * tau) ** 0.9
+    return y, z, False
+
+
+def run_hips_dz(u):
+    """Hüfthöhe: in der Standphase eines Beins eingefedert, in der Flugphase leicht angehoben."""
+    s = RUN_STANCE
+    u_leg = u % 0.5 * 1.0  # beide Beine wechseln sich ab: Halbzyklus
+    half = 0.5
+    if u_leg < s:
+        return -0.08 - 0.03 * math.sin(math.pi * u_leg / s)
+    flight = (u_leg - s) / (half - s)
+    return -0.08 + 0.045 * math.sin(math.pi * flight)
+
+
+def run_legs(u):
+    """Winkel beider Beine und Hüfthöhe: {l: (thigh, flex, im Stand?, erreicht?)}, dz."""
+    dz = run_hips_dz(u)
+    legs_out = {}
+    for name, offset in (("l", 0.0), ("r", 0.5)):
+        y, z, stance = run_foot((u + offset) % 1.0)
+        z_rel = z - (HIP_HEIGHT + dz)
+        thigh, flex, reached = leg_ik(y, z_rel)
+        legs_out[name] = (thigh, flex, stance, reached, y)
+    return legs_out, dz
+
+
 def run_pose(t):
     p = 2 * math.pi * t
+    legs_out, dz = run_legs(t)
     pose = {}
-    thighs, knees = {}, {}
-    for n, off in (("l", 0.0), ("r", math.pi)):
-        th = p + off
-        thighs[n] = 46 * math.sin(th) + 6
-        knees[n] = 14 + 78 * max(0.0, math.cos(th - 0.35)) ** 1.4
-    legs_pose, dz = legs(thighs["l"], knees["l"], thighs["r"], knees["r"])
-    pose.update(legs_pose)
-    pose.update(hips_pose(dz, pitch=-6, yaw=7 * math.sin(p), roll=3 * math.sin(p)))
-    pose["spine"] = (-7, 0, -6 * math.sin(p))
-    pose["chest"] = (-7, 0, -6 * math.sin(p))
-    pose["head"] = (10, 0, 2 * math.sin(p))
-    for n, off in (("l", math.pi), ("r", 0.0)):  # Arm gegenläufig zum gleichseitigen Bein
-        th = p + off
-        pose[f"upper_arm_{n}"] = (-44 * math.sin(th) + 6, 0, -8 if n == "l" else 8)
-        pose[f"forearm_{n}"] = (72 + 20 * math.cos(th), 0, 0)
-        pose[f"hand_{n}"] = (6, 0, 0)
-    pose.update(scarf(-22 + 8 * math.sin(2 * p + 0.5), -12 + 10 * math.sin(2 * p - 0.3), -4 + 12 * math.sin(2 * p - 1.0), 7 * math.sin(p)))
+    for name, (thigh, flex, stance, _reached, _y) in legs_out.items():
+        pose[f"thigh_{name}"] = (thigh, 0, 0)
+        pose[f"shin_{name}"] = (-flex, 0, 0)
+        # Fuß flach im Stand, in der Schwungphase leicht nach unten gestreckt
+        foot = (flex - thigh) + (0.0 if stance else -18.0)
+        pose[f"foot_{name}"] = (foot, 0, 0)
+    pose.update(hips_pose(dz, yaw=5 * math.sin(p), roll=2.5 * math.sin(p)))
+    pose["spine"] = (-8, 0, -5 * math.sin(p))
+    pose["chest"] = (-6, 0, -5 * math.sin(p))
+    pose["head"] = (12, 0, 1.5 * math.sin(p))
+    # Arme gegenläufig zu den Beinen: linker Arm hinten, wenn das linke Bein vorn aufsetzt
+    for name, sign in (("l", -1.0), ("r", 1.0)):
+        swing = sign * 52 * math.cos(p)
+        pose[f"upper_arm_{name}"] = (swing + 4, 0, -7 if name == "l" else 7)
+        pose[f"forearm_{name}"] = (88 + 14 * sign * math.cos(p), 0, 0)
+        pose[f"hand_{name}"] = (6, 0, 0)
+    # Schal: weht fast waagerecht nach hinten, Welle läuft zum Ende hin
+    pose.update(
+        scarf(
+            -4 + 7 * math.sin(2 * p),
+            -8 + 9 * math.sin(2 * p - 0.9),
+            -8 + 11 * math.sin(2 * p - 1.8),
+            6 * math.sin(p),
+        )
+    )
     return pose
+
+
+def run_report():
+    """Prüfzahlen des Laufzyklus: Rutschen, Reichweite, Kniebeugung, Körperauf und -ab."""
+    n = 170
+    clamped = 0
+    flex_min, flex_max = 999.0, 0.0
+    dz_min, dz_max = 999.0, -999.0
+    max_err = 0.0
+    stance_speeds = []
+    previous = None
+    for i in range(n + 1):
+        u = i / n
+        legs_out, dz = run_legs(u)
+        dz_min, dz_max = min(dz_min, dz), max(dz_max, dz)
+        for name, (thigh, flex, stance, reached, y) in legs_out.items():
+            clamped += 0 if reached else 1
+            flex_min, flex_max = min(flex_min, flex), max(flex_max, flex)
+            fy, _fz = leg_foot(thigh, flex)
+            if reached:
+                max_err = max(max_err, abs(fy - y))
+        # Standfuß: Geschwindigkeit des Knöchels relativ zur Hüfte
+        l_thigh, l_flex, l_stance, _r, _y = legs_out["l"]
+        fy_now, _ = leg_foot(l_thigh, l_flex)
+        if previous is not None and previous[1] and l_stance:
+            stance_speeds.append(-(fy_now - previous[0]) / (RUN_CYCLE_SECONDS / n))
+        previous = (fy_now, l_stance)
+    avg = sum(stance_speeds) / len(stance_speeds) if stance_speeds else 0.0
+    print(
+        "Laufzyklus: Zyklus %.2f s, Kontakt %.2f s, Standfuß %.2f m/s (Soll %.1f), "
+        "Kniebeugung %.0f bis %.0f Grad, Hüfte %.1f bis %.1f cm, nicht erreicht: %d, FK-Abweichung %.4f m"
+        % (RUN_CYCLE_SECONDS, RUN_CONTACT_SECONDS, avg, RUN_SPEED, flex_min, flex_max,
+           dz_min * 100, dz_max * 100, clamped, max_err)
+    )
 
 
 def sneak_pose(t):
@@ -492,7 +621,7 @@ def land_pose(t):
 
 CLIPS = [
     ("idle-loop", 60, idle_pose, True),
-    ("run-loop", 18, run_pose, True),
+    ("run-loop", 17, run_pose, True),
     ("sneak-loop", 36, sneak_pose, True),
     ("sneak_idle-loop", 60, sneak_idle_pose, True),
     ("jump", 10, jump_pose, False),
@@ -577,8 +706,10 @@ def make_previews(rig, actions, folder):
         ("idle-loop", 0, "seite"),
         ("idle-loop", 0, "hinten"),
         ("run-loop", 0, "seite"),
+        ("run-loop", 3, "seite"),
         ("run-loop", 5, "seite"),
-        ("run-loop", 9, "seite"),
+        ("run-loop", 8, "seite"),
+        ("run-loop", 11, "seite"),
         ("run-loop", 14, "seite"),
         ("sneak-loop", 0, "seite"),
         ("sneak-loop", 18, "seite"),
@@ -634,6 +765,7 @@ def main():
     actions = build_actions(rig)
     bpy.ops.object.mode_set(mode="OBJECT")
 
+    run_report()
     if preview:
         make_previews(rig, actions, preview)
     export_glb(out)
