@@ -68,6 +68,7 @@ func _build_path() -> void:
 	strip.mesh = mesh
 	strip.material_override = stone
 	strip.position = Vector3(0, 0.02, -2.0)
+	strip.set_meta(CartoonStyle.NO_OUTLINE, true)
 	add_child(strip)
 
 

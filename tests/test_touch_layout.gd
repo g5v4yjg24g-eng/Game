@@ -33,3 +33,16 @@ func run(t: Object) -> void:
 	t.check(jump_safe.x < jump.x and jump_safe.y < jump.y, "Safe Area schiebt Knöpfe nach innen")
 	var hint := TouchLayout.joystick_hint(size, island)
 	t.check(hint.x > 59.0 and hint.y < size.y - 21.0, "Joystick-Hinweis liegt in der Safe Area")
+
+	# Testknopf für den Cartoon-Stil oben rechts
+	var style := TouchLayout.button_center(TouchLayout.Zone.STYLE, size, none)
+	t.check(
+		TouchLayout.zone_at(style, size, none) == TouchLayout.Zone.STYLE, "Mitte des Stil-Knopfs"
+	)
+	t.check(style.x > size.x * 0.8 and style.y < size.y * 0.3, "Stil-Knopf sitzt oben rechts")
+	t.check(
+		TouchLayout.zone_at(style + Vector2(-200, 0), size, none) == TouchLayout.Zone.LOOK,
+		"daneben bleibt die Kamerafläche"
+	)
+	var style_safe := TouchLayout.button_center(TouchLayout.Zone.STYLE, size, island)
+	t.check(style_safe.x < style.x, "Safe Area schiebt den Stil-Knopf nach innen")

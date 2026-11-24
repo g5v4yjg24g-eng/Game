@@ -5,7 +5,8 @@ Aufruf (mit dem Python-Modul `bpy`, Blender 4.x oder 5.x):
 
 Die Figur ist komplett eigenes Werk, ohne Fremd-Assets. Blickrichtung im Blender-Raum ist +Y;
 der glTF-Export macht daraus -Z, die Blickrichtung in Godot. Maße in Metern, Füße bei z = 0,
-Körpergröße etwa 1,8 m. Animationsnamen mit Endung "-loop" wiederholt Godot beim Import.
+Körpergröße etwa 1,45 m (Chibi-Proportionen: großer Kopf, kurze Beine, Zielrichtung nach dem Referenzbild
+des Nutzers). Animationsnamen mit Endung "-loop" wiederholt Godot beim Import.
 """
 
 import math
@@ -18,42 +19,54 @@ from mathutils import Euler, Matrix, Vector  # noqa: E402
 
 FPS = 30
 
-# --- Farben ------------------------------------------------------------------------------------
+# --- Farben (Cartoon-Palette, siehe docs/STIL_CARTOON.md) --------------------------------------
 MATERIALS = [
-    ("stoff", (0.045, 0.05, 0.10), 0.85, 0.0),  # 0 dunkelblauer Stoff
-    ("rot", (0.62, 0.09, 0.07), 0.75, 0.0),  # 1 Schal und Gürtel
-    ("haut", (0.78, 0.62, 0.50), 0.7, 0.0),  # 2 Augenpartie
-    ("binde", (0.22, 0.20, 0.17), 0.9, 0.0),  # 3 Bandagen
-    ("stahl", (0.62, 0.64, 0.68), 0.35, 0.8),  # 4 Schwert
-    ("griff", (0.08, 0.06, 0.05), 0.8, 0.0),  # 5 Schwertgriff
-    ("dunkel", (0.02, 0.02, 0.025), 0.8, 0.0),  # 6 Schuhe, Handschuhe, Scheide
+    ("stoff", (0.20, 0.20, 0.25), 0.9, 0.0),  # 0 Anthrazit: Kleidung, Kapuze
+    ("rot", (0.80, 0.17, 0.15), 0.8, 0.0),  # 1 Akzent: Stirnband, Gürtel, Polster, Knieschützer
+    ("haut", (0.95, 0.70, 0.42), 0.8, 0.0),  # 2 Gesicht, Fäuste
+    ("hell", (0.36, 0.36, 0.42), 0.9, 0.0),  # 3 Maske, Kragen, Manschetten
+    ("stahl", (0.68, 0.70, 0.75), 0.35, 0.8),  # 4 Schwert
+    ("griff", (0.10, 0.08, 0.07), 0.8, 0.0),  # 5 Schwertgriff
+    ("dunkel", (0.09, 0.09, 0.12), 0.85, 0.0),  # 6 Stiefel, Scheide, Hauben-Grat
+    ("weiss", (0.97, 0.97, 0.97), 0.6, 0.0),  # 7 Augen
+    ("schwarz", (0.02, 0.02, 0.03), 0.6, 0.0),  # 8 Pupillen, Brauen
 ]
-STOFF, ROT, HAUT, BINDE, STAHL, GRIFF, DUNKEL = range(7)
+STOFF, ROT, HAUT, HELL, STAHL, GRIFF, DUNKEL, WEISS, SCHWARZ = range(9)
+
+# --- Maße (Meter, Füße bei z = 0) ---------------------------------------------------------------
+THIGH_LEN = 0.26
+SHIN_LEN = 0.25
+LEG_STAND = THIGH_LEN + SHIN_LEN  # Hüfte bis Knöchel bei gestrecktem Bein
+HIP_HEIGHT = 0.58  # Höhe des Hüftknochens im Stand
+ANKLE_HEIGHT = 0.07  # Höhe des Knöchels (Fußknochen) im Stand
+HEAD_CENTER = (0.0, 0.0, 1.20)
+HEAD_RADII = (0.29, 0.28, 0.27)  # Kapuze: breiter als die Schultern (Chibi)
+# Entwurfstempo des Laufzyklus in m/s. Muss zu RUN_SPEED in core/controls_config.gd passen,
+# sonst rutschen die Füße.
+RUN_SPEED = 5.2
 
 # --- Skelett (Armature-Raum, x = rechts, y = vorn, z = oben) -------------------------------------
 # name: (Elternknochen, Kopf, Ende)
 BONES = {
-    "root": (None, (0, 0, 0), (0, 0, 0.2)),
-    "hips": ("root", (0, 0, 0.98), (0, 0, 1.08)),
-    "spine": ("hips", (0, 0, 1.08), (0, 0, 1.27)),
-    "chest": ("spine", (0, 0, 1.27), (0, 0, 1.50)),
-    "neck": ("chest", (0, 0, 1.50), (0, 0, 1.60)),
-    "head": ("neck", (0, 0, 1.60), (0, 0, 1.85)),
-    "scarf_1": ("neck", (0, -0.09, 1.55), (0, -0.32, 1.50)),
-    "scarf_2": ("scarf_1", (0, -0.32, 1.50), (0, -0.56, 1.42)),
-    "scarf_3": ("scarf_2", (0, -0.56, 1.42), (0, -0.80, 1.33)),
+    "root": (None, (0, 0, 0), (0, 0, 0.12)),
+    "hips": ("root", (0, 0, 0.58), (0, 0, 0.64)),
+    "spine": ("hips", (0, 0, 0.64), (0, 0, 0.78)),
+    "chest": ("spine", (0, 0, 0.78), (0, 0, 0.95)),
+    "neck": ("chest", (0, 0, 0.95), (0, 0, 1.00)),
+    "head": ("neck", (0, 0, 1.00), (0, 0, 1.46)),
+    # Flatternde Enden des Stirnbands (Kette aus drei Knochen, wie ein Schal)
+    "band_1": ("head", (0, -0.25, 1.34), (0, -0.38, 1.35)),
+    "band_2": ("band_1", (0, -0.38, 1.35), (0, -0.50, 1.33)),
+    "band_3": ("band_2", (0, -0.50, 1.33), (0, -0.62, 1.29)),
 }
 SIDES = {"l": -1.0, "r": 1.0}  # anatomisch: links = -x bei Blick nach +y
 for _n, _s in SIDES.items():
-    BONES[f"upper_arm_{_n}"] = ("chest", (_s * 0.265, 0, 1.44), (_s * 0.265, 0, 1.14))
-    BONES[f"forearm_{_n}"] = (f"upper_arm_{_n}", (_s * 0.265, 0, 1.14), (_s * 0.265, 0, 0.90))
-    BONES[f"hand_{_n}"] = (f"forearm_{_n}", (_s * 0.265, 0, 0.90), (_s * 0.265, 0, 0.80))
-    BONES[f"thigh_{_n}"] = ("hips", (_s * 0.10, 0, 0.98), (_s * 0.10, 0, 0.54))
-    BONES[f"shin_{_n}"] = (f"thigh_{_n}", (_s * 0.10, 0, 0.54), (_s * 0.10, 0, 0.10))
-    BONES[f"foot_{_n}"] = (f"shin_{_n}", (_s * 0.10, 0, 0.10), (_s * 0.10, 0.16, 0.04))
-
-THIGH_LEN = 0.44
-SHIN_LEN = 0.44
+    BONES[f"upper_arm_{_n}"] = ("chest", (_s * 0.25, 0, 0.92), (_s * 0.25, 0, 0.75))
+    BONES[f"forearm_{_n}"] = (f"upper_arm_{_n}", (_s * 0.25, 0, 0.75), (_s * 0.25, 0, 0.61))
+    BONES[f"hand_{_n}"] = (f"forearm_{_n}", (_s * 0.25, 0, 0.61), (_s * 0.25, 0, 0.52))
+    BONES[f"thigh_{_n}"] = ("hips", (_s * 0.11, 0, 0.58), (_s * 0.11, 0, 0.32))
+    BONES[f"shin_{_n}"] = (f"thigh_{_n}", (_s * 0.11, 0, 0.32), (_s * 0.11, 0, 0.07))
+    BONES[f"foot_{_n}"] = (f"shin_{_n}", (_s * 0.11, 0, 0.07), (_s * 0.11, 0.10, 0.03))
 
 
 # --- Geometrie ---------------------------------------------------------------------------------
@@ -63,7 +76,10 @@ class MeshBuilder:
     def __init__(self):
         self.bm = bmesh.new()
         self.deform = self.bm.verts.layers.deform.verify()
+        self.width_layer = self.bm.verts.layers.float.new("outline_w")
         self.groups = list(BONES.keys())
+        # Breitenfaktor des Cartoon-Umrisses für alle folgenden Teile (dünne Teile: klein)
+        self.outline_scale = 1.0
 
     def _finish(self, verts, bone, material, smooth):
         index = self.groups.index(bone)
@@ -73,6 +89,7 @@ class MeshBuilder:
             f.smooth = smooth
         for v in verts:
             v[self.deform][index] = 1.0
+            v[self.width_layer] = self.outline_scale
 
     def ellipsoid(self, bone, center, radii, material, smooth=True, segments=14, rings=9):
         geo = bmesh.ops.create_uvsphere(self.bm, u_segments=segments, v_segments=rings, radius=1.0)
@@ -123,7 +140,9 @@ class MeshBuilder:
             ring = []
             for i in range(segments):
                 ang = 2 * math.pi * i / segments
-                ring.append(self.bm.verts.new((rx * math.sin(ang), ry * math.cos(ang), z)))
+                vert = self.bm.verts.new((rx * math.sin(ang), ry * math.cos(ang), z))
+                vert[self.width_layer] = self.outline_scale
+                ring.append(vert)
             rings.append(ring)
         faces = []
         for r in range(len(rings) - 1):
@@ -155,6 +174,20 @@ class MeshBuilder:
                     v[self.deform][self.groups.index(name)] = w
 
 
+    def cone(self, bone, a, b, r1, r2, material, segments=12):
+        """Kegel(stumpf) von a (Radius r1) nach b (Radius r2), mit Deckflächen."""
+        a, b = Vector(a), Vector(b)
+        rot = z_aligned(a, b)
+        geo = bmesh.ops.create_cone(
+            self.bm, cap_ends=True, cap_tris=False, segments=segments, radius1=r1, radius2=r2, depth=(b - a).length
+        )
+        verts = list(geo["verts"])
+        center = (a + b) / 2
+        for v in verts:
+            v.co = rot @ Vector(v.co) + center
+        self._finish(verts, bone, material, True)
+
+
 def aligned(a, b):
     """Drehung, die die y-Achse eines Quaders auf die Strecke a -> b legt."""
     d = (Vector(b) - Vector(a)).normalized()
@@ -170,60 +203,84 @@ def z_aligned(a, b):
 def build_geometry():
     m = MeshBuilder()
 
-    # Rumpf: ein glatter Verlauf von der Hüfte bis zu den Schultern
+    # Rumpf: kompakt, ein glatter Verlauf von der Hüfte bis zu den Schultern
     torso = [
-        (0.93, 0.17, 0.12),
-        (1.00, 0.195, 0.135),
-        (1.08, 0.175, 0.125),
-        (1.16, 0.155, 0.112),
-        (1.26, 0.18, 0.12),
-        (1.36, 0.215, 0.135),
-        (1.46, 0.215, 0.13),
-        (1.52, 0.14, 0.10),
+        (0.52, 0.150, 0.110),
+        (0.60, 0.175, 0.125),
+        (0.68, 0.160, 0.115),
+        (0.77, 0.185, 0.125),
+        (0.87, 0.205, 0.130),
+        (0.94, 0.190, 0.115),
+        (0.98, 0.110, 0.085),
     ]
-    m.loft(torso, [("hips", 1.03), ("spine", 1.18), ("chest", 1.40)], STOFF)
-    m.ellipsoid("hips", (0, 0, 1.075), (0.19, 0.14, 0.035), ROT)  # Gürtel
-    m.box("hips", (0, -0.14, 1.075), (0.09, 0.05, 0.08), ROT)  # Gürtelknoten
+    m.loft(torso, [("hips", 0.60), ("spine", 0.72), ("chest", 0.88)], STOFF)
+    # Gürtel mit Knoten
+    m.ellipsoid("hips", (0, 0, 0.665), (0.175, 0.13, 0.036), ROT)
+    m.ellipsoid("hips", (0, 0.135, 0.665), (0.06, 0.04, 0.05), ROT)  # Knoten
+    m.box("hips", (-0.05, 0.135, 0.605), (0.045, 0.02, 0.09), ROT, rot_deg=(0, 0, 18))
+    m.box("hips", (0.05, 0.135, 0.605), (0.045, 0.02, 0.09), ROT, rot_deg=(0, 0, -18))
+    # Überkreuzter Wickelkragen: helle Lappen mit rotem Einsatz
+    m.ellipsoid("chest", (0, 0.105, 0.90), (0.075, 0.03, 0.08), ROT)
+    m.box("chest", (-0.075, 0.118, 0.855), (0.11, 0.03, 0.2), HELL, rot_deg=(0, -28, 0))
+    m.box("chest", (0.075, 0.118, 0.855), (0.11, 0.03, 0.2), HELL, rot_deg=(0, 28, 0))
 
-    # Kopf mit Kapuze, Augenpartie und Haarknoten
-    m.cylinder("neck", (0, 0, 1.56), 0.058, 0.14, STOFF)
-    m.ellipsoid("head", (0, 0, 1.72), (0.125, 0.14, 0.14), STOFF)
-    m.box("head", (0, 0.122, 1.725), (0.15, 0.045, 0.05), HAUT)
+    # Kopf: Kapuze, Gesicht, Maske, große Augen mit Brauen, Stirnband mit Enden
+    cx, cy, cz = HEAD_CENTER
+    m.ellipsoid("head", HEAD_CENTER, HEAD_RADII, STOFF, segments=32, rings=20)
+    m.ellipsoid("head", (0, 0.15, 1.18), (0.185, 0.14, 0.115), HAUT, segments=28, rings=16)  # Gesicht
+    m.ellipsoid("head", (0, 0.14, 1.05), (0.215, 0.16, 0.085), HELL, segments=28, rings=16)  # Maske
     for side in (-1, 1):
-        m.box("head", (side * 0.04, 0.147, 1.727), (0.035, 0.012, 0.014), DUNKEL)  # Augen
-    m.box("head", (0, 0.127, 1.762), (0.17, 0.04, 0.012), DUNKEL)  # Stirnband
-    m.ellipsoid("head", (0, -0.11, 1.81), (0.045, 0.055, 0.055), STOFF)  # Haarknoten
-    m.ellipsoid("neck", (0, 0, 1.55), (0.118, 0.118, 0.045), ROT)  # Schal um den Hals
+        x = side * 0.088
+        m.ellipsoid("head", (x, 0.285, 1.20), (0.068, 0.025, 0.075), WEISS)  # Auge
+        m.ellipsoid("head", (x + side * 0.004, 0.303, 1.195), (0.036, 0.015, 0.045), SCHWARZ)  # Pupille
+        m.ellipsoid("head", (x - side * 0.016, 0.316, 1.222), (0.013, 0.008, 0.016), WEISS)  # Glanzpunkt
+        # Braue: innen tiefer (zorniger Blick)
+        m.box("head", (x, 0.298, 1.275), (0.115, 0.022, 0.03), SCHWARZ, rot_deg=(0, -side * 22, 0))
+    band = [
+        (1.310, 0.277, 0.268),
+        (1.340, 0.260, 0.251),
+        (1.370, 0.237, 0.230),
+    ]
+    m.loft(band, [("head", 1.0)], ROT, segments=20)
+    # Spitzen seitlich am Stirnband (wie in der Vorlage)
+    for side in (-1, 1):
+        m.cone("head", (side * 0.255, -0.02, 1.335), (side * 0.37, -0.03, 1.50), 0.055, 0.0, ROT)
 
-    # Schalenden
-    points = [(0, -0.09, 1.55), (0, -0.32, 1.50), (0, -0.56, 1.42), (0, -0.80, 1.33)]
-    widths = [0.13, 0.12, 0.10]
-    for i, bone in enumerate(["scarf_1", "scarf_2", "scarf_3"]):
+    # Enden des Stirnbands (dünn: schmaler Umriss)
+    m.outline_scale = 0.2
+    points = [(0, -0.25, 1.34), (0, -0.38, 1.35), (0, -0.50, 1.33), (0, -0.62, 1.29)]
+    widths = [0.14, 0.12, 0.10]
+    for i, bone in enumerate(["band_1", "band_2", "band_3"]):
         a, b = points[i], points[i + 1]
         mid = (Vector(a) + Vector(b)) / 2
         length = (Vector(b) - Vector(a)).length
         m.box(bone, mid, (widths[i], length, 0.014), ROT, matrix=aligned(a, b))
-        # zweiter, senkrechter Streifen: von der Seite und von hinten sichtbar
         m.box(bone, mid, (0.014, length, widths[i] * 0.75), ROT, matrix=aligned(a, b))
+    m.outline_scale = 1.0
 
-    # Arme und Beine
+    # Arme und Beine: kräftig und kurz, Fäuste in Hautfarbe, rote Polster
     for n, side in SIDES.items():
-        x = side * 0.265
-        m.capsule(f"upper_arm_{n}", (x, 0, 1.43), (x, 0, 1.15), 0.068, 0.056, STOFF)
-        m.capsule(f"forearm_{n}", (x, 0, 1.15), (x, 0, 0.92), 0.056, 0.046, BINDE)
-        m.ellipsoid(f"hand_{n}", (x, 0.005, 0.86), (0.045, 0.04, 0.06), DUNKEL)
-        x = side * 0.10
-        m.capsule(f"thigh_{n}", (x, 0, 0.97), (x, 0, 0.55), 0.108, 0.078, STOFF)
-        m.capsule(f"shin_{n}", (x, 0, 0.54), (x, 0, 0.14), 0.074, 0.052, BINDE)
-        m.ellipsoid(f"foot_{n}", (x, 0.055, 0.052), (0.068, 0.13, 0.052), DUNKEL)
+        x = side * 0.25
+        m.capsule(f"upper_arm_{n}", (x, 0, 0.91), (x, 0, 0.76), 0.070, 0.060, STOFF)
+        m.ellipsoid(f"upper_arm_{n}", (side * 0.27, 0, 0.955), (0.095, 0.085, 0.065), ROT)  # Schulterpolster
+        m.capsule(f"forearm_{n}", (x, 0, 0.76), (x, 0, 0.625), 0.060, 0.052, STOFF)
+        m.ellipsoid(f"forearm_{n}", (x, 0, 0.64), (0.064, 0.064, 0.02), HELL)  # Manschette
+        m.ellipsoid(f"hand_{n}", (x, 0.015, 0.555), (0.080, 0.080, 0.080), HAUT)  # Faust
+        x = side * 0.11
+        m.capsule(f"thigh_{n}", (x, 0, 0.57), (x, 0, 0.34), 0.092, 0.078, STOFF)
+        m.capsule(f"shin_{n}", (x, 0, 0.32), (x, 0, 0.11), 0.076, 0.062, STOFF)
+        m.ellipsoid(f"shin_{n}", (x, 0.045, 0.30), (0.078, 0.055, 0.07), ROT)  # Knieschützer
+        m.ellipsoid(f"foot_{n}", (x, 0.045, 0.058), (0.085, 0.145, 0.062), DUNKEL)  # Stiefel
 
-    # Schwert auf dem Rücken: Griff über der rechten Schulter, Scheide nach links unten
-    top = Vector((0.13, -0.17, 1.80))
-    guard = Vector((0.095, -0.17, 1.70))
-    tip = Vector((-0.18, -0.17, 0.96))
-    m.cylinder("chest", (top + guard) / 2, 0.016, (top - guard).length, GRIFF, matrix=z_aligned(guard, top))
-    m.cylinder("chest", guard, 0.048, 0.012, STAHL, matrix=z_aligned(guard, top))  # Stichblatt
-    m.box("chest", (guard + tip) / 2, (0.05, (tip - guard).length, 0.036), DUNKEL, matrix=aligned(guard, tip))
+    # Schwert auf dem Rücken: Griff über der rechten Schulter, Scheide nach links unten (dünn)
+    m.outline_scale = 0.3
+    top = Vector((0.10, -0.165, 1.08))
+    guard = Vector((0.075, -0.165, 0.99))
+    tip = Vector((-0.15, -0.165, 0.46))
+    m.cylinder("chest", (top + guard) / 2, 0.018, (top - guard).length, GRIFF, matrix=z_aligned(guard, top))
+    m.cylinder("chest", guard, 0.05, 0.014, STAHL, matrix=z_aligned(guard, top))  # Stichblatt
+    m.box("chest", (guard + tip) / 2, (0.052, (tip - guard).length, 0.038), DUNKEL, matrix=aligned(guard, tip))
+    m.outline_scale = 1.0
 
     mesh = bpy.data.meshes.new("NinjaMesh")
     m.bm.to_mesh(mesh)
@@ -240,6 +297,39 @@ def build_geometry():
         bsdf.inputs["Roughness"].default_value = rough
         bsdf.inputs["Metallic"].default_value = metal
         mesh.materials.append(material)
+    return obj
+
+
+def build_outline(mesh_obj):
+    """Zweites Mesh für den Cartoon-Umriss: gleiche Form, aber überall geglättete Normale.
+
+    Godot zeichnet es mit einem Shader, der die Fläche entlang der Normale aufbläht und nur die
+    Rückseiten zeigt (Inverted Hull). Mit geglätteten Normalen entstehen an Kanten keine Lücken.
+    Das Mesh hängt am selben Skelett und bewegt sich mit.
+    """
+    mesh = mesh_obj.data.copy()
+    mesh.name = "NinjaUmrissMesh"
+    mesh.materials.clear()
+    material = bpy.data.materials.new("umriss")
+    material.use_nodes = True
+    material.node_tree.nodes["Principled BSDF"].inputs["Base Color"].default_value = (0.04, 0.04, 0.07, 1.0)
+    mesh.materials.append(material)
+    for poly in mesh.polygons:
+        poly.material_index = 0
+        poly.use_smooth = True
+    normals = [tuple(mesh.vertex_normals[loop.vertex_index].vector) for loop in mesh.loops]
+    mesh.normals_split_custom_set(normals)
+    # Breitenfaktor je Punkt als Vertexfarbe (Rot-Kanal): der Umriss-Shader skaliert damit seine Breite
+    factor = mesh.attributes["outline_w"]
+    colors = mesh.color_attributes.new("Breite", "FLOAT_COLOR", "POINT")
+    for i, item in enumerate(colors.data):
+        w = factor.data[i].value
+        item.color = (w, w, w, 1.0)
+    mesh.color_attributes.active_color = colors
+    obj = bpy.data.objects.new("NinjaUmriss", mesh)
+    bpy.context.scene.collection.objects.link(obj)
+    for group in mesh_obj.vertex_groups:
+        obj.vertex_groups.new(name=group.name)
     return obj
 
 
@@ -298,7 +388,7 @@ def leg_drop(thigh, knee):
     return THIGH_LEN * math.cos(a) + SHIN_LEN * math.cos(a - math.radians(knee))
 
 
-def legs(thigh_l, knee_l, thigh_r, knee_r, stand=0.88):
+def legs(thigh_l, knee_l, thigh_r, knee_r, stand=LEG_STAND):
     """Beinposen und Hüfthöhe so, dass der tiefere Fuß den Boden berührt (grobe Erdung)."""
     dz = max(leg_drop(thigh_l, knee_l), leg_drop(thigh_r, knee_r)) - stand
     pose = {}
@@ -311,10 +401,11 @@ def legs(thigh_l, knee_l, thigh_r, knee_r, stand=0.88):
 
 
 def scarf(a1, a2, a3, sway=0.0):
+    """Enden des Stirnbands (Knochen band_1 bis band_3)."""
     return {
-        "scarf_1": (a1, 0, sway),
-        "scarf_2": (a2, 0, sway * 1.3),
-        "scarf_3": (a3, 0, sway * 1.6),
+        "band_1": (a1, 0, sway),
+        "band_2": (a2, 0, sway * 1.3),
+        "band_3": (a3, 0, sway * 1.6),
     }
 
 
@@ -322,47 +413,196 @@ def hips_pose(dz, pitch=0.0, yaw=0.0, roll=0.0, dy=0.0):
     return {"hips": ((pitch, roll, yaw), (0, dy, dz))}
 
 
+def legs_wide(thigh_l, knee_l, thigh_r, knee_r, spread):
+    """Breiter Stand: Beine nach außen gespreizt (Drehung um die Vorwärtsachse).
+
+    spread: Spreizwinkel der Oberschenkel in Grad. Der Unterschenkel dreht teilweise zurück, die
+    Füße bleiben flach. Hüfthöhe aus der Beinlänge, damit beide Füße am Boden bleiben.
+    """
+    outer = spread  # Oberschenkel
+    inner = -0.7 * spread  # Unterschenkel dreht zurück
+    foot_roll = -(outer + inner)  # Sohle bleibt waagerecht
+    drop = max(leg_drop(thigh_l, knee_l), leg_drop(thigh_r, knee_r)) * math.cos(math.radians(0.55 * spread))
+    dz = drop - LEG_STAND
+    pose = {}
+    for n, th, kn, sign in (("l", thigh_l, knee_l, 1.0), ("r", thigh_r, knee_r, -1.0)):
+        pose[f"thigh_{n}"] = (th, sign * outer, 0)
+        pose[f"shin_{n}"] = (-kn, sign * inner, 0)
+        pose[f"foot_{n}"] = ((kn - th), sign * foot_roll, 0)
+    return pose, dz
+
+
 def idle_pose(t):
+    """Ruhepose: Kampfhaltung wie in der Vorlage. Breiter, tiefer Stand, Fäuste vor der Brust."""
     p = 2 * math.pi * t
     breathe = math.sin(p)
-    pose = {}
-    legs_pose, dz = legs(3, 6, -3, 6)
-    pose.update(legs_pose)
-    pose.update(hips_pose(dz + 0.004 * breathe, roll=1.0 * math.sin(p)))
-    pose["spine"] = (-2 + 1.2 * breathe, 0, 0)
-    pose["chest"] = (-1 + 1.5 * breathe, 0, 1.5 * math.sin(p))
-    pose["head"] = (2 - 1.0 * breathe, 0, 3 * math.sin(p + 0.7))
-    pose["upper_arm_l"] = (4 + 1.5 * breathe, 0, -6)
-    pose["upper_arm_r"] = (-2 - 1.5 * breathe, 0, 6)
-    pose["forearm_l"] = (16 + 2 * breathe, 0, 0)
-    pose["forearm_r"] = (18 - 2 * breathe, 0, 0)
-    pose["hand_l"] = (4, 0, 0)
-    pose["hand_r"] = (4, 0, 0)
-    pose.update(scarf(2 + 2 * math.sin(p), 4 + 3 * math.sin(p - 0.6), 6 + 4 * math.sin(p - 1.2), 4 * math.sin(p)))
+    sway = math.sin(p + 0.8)
+    legs_pose, dz = legs_wide(36, 60, 32, 56, 24)
+    pose = dict(legs_pose)
+    pose.update(hips_pose(dz + 0.008 * breathe, pitch=-3, roll=1.5 * sway))
+    pose["spine"] = (-14 + 1.5 * breathe, 0, 2 * sway)
+    pose["chest"] = (-8 + 2.0 * breathe, 0, -2 * sway)
+    pose["head"] = (16 - 1.5 * breathe, 0, 3 * math.sin(p + 1.4))
+    # Fäuste vor Brust und Kinn, Ellbogen leicht nach außen
+    pose["upper_arm_l"] = (46 + 2.5 * breathe, 24, 0)
+    pose["upper_arm_r"] = (42 - 2.5 * breathe, -24, 0)
+    pose["forearm_l"] = (104 - 3 * breathe, 0, 0)
+    pose["forearm_r"] = (108 + 3 * breathe, 0, 0)
+    pose["hand_l"] = (8, 0, 0)
+    pose["hand_r"] = (8, 0, 0)
+    pose.update(scarf(-4 + 3 * math.sin(p), -7 + 4 * math.sin(p - 0.6), -9 + 5 * math.sin(p - 1.2), 4 * math.sin(p)))
     return pose
+
+
+# --- Laufzyklus mit Fußführung (Zwei-Gelenk-Berechnung) ----------------------------------------
+RUN_FRAMES = 16  # Bilder je Zyklus (beide Schritte), 0,53 s
+RUN_CYCLE_SECONDS = RUN_FRAMES / FPS
+RUN_CONTACT_SECONDS = 0.07  # Bodenkontakt je Fuß
+RUN_STANCE = RUN_CONTACT_SECONDS / RUN_CYCLE_SECONDS  # Anteil des Zyklus im Stand
+RUN_STRIDE_HALF = RUN_SPEED * RUN_CONTACT_SECONDS / 2  # Fuß vor und hinter der Hüfte im Stand
+RUN_LIFT = 0.05  # Fußhöhe in der Schwungphase (niedrig: Kniebeugung bleibt unter etwa 75 Grad)
+RUN_TANGENT = 0.2  # Anteil der Standgeschwindigkeit, der in die Schwungkurve übergeht
+RUN_DZ_STAND = -0.04  # Hüfte beim Aufsetzen und Abdrücken (relativ zum Stand)
+RUN_DZ_COMPRESS = 0.01  # zusätzliches Einfedern in der Mitte der Standphase
+RUN_DZ_FLIGHT = 0.01  # Anheben in der Flugphase
+
+
+def leg_ik(y, z_rel):
+    """Beinwinkel für einen Knöchel an (y, z_rel) relativ zur Hüfte in der Seitenebene.
+
+    y: nach vorn positiv, z_rel: negativ unter der Hüfte. Rückgabe: (Oberschenkel, Kniebeugung,
+    erreicht) in Grad; "erreicht" ist False, wenn das Ziel zu weit weg war und gekürzt wurde.
+    """
+    reach = THIGH_LEN + SHIN_LEN - 1e-4
+    d = math.hypot(y, z_rel)
+    ok = d <= reach
+    d = min(d, reach)
+    cos_knee = (THIGH_LEN**2 + SHIN_LEN**2 - d**2) / (2 * THIGH_LEN * SHIN_LEN)
+    flex = math.pi - math.acos(max(-1.0, min(1.0, cos_knee)))
+    base = math.atan2(y, -z_rel)
+    cos_hip = (THIGH_LEN**2 + d**2 - SHIN_LEN**2) / (2 * THIGH_LEN * d)
+    thigh = base + math.acos(max(-1.0, min(1.0, cos_hip)))
+    return math.degrees(thigh), math.degrees(flex), ok
+
+
+def leg_foot(thigh_deg, flex_deg):
+    """Vorwärtsrechnung (Gegenprobe): Knöchelposition (y, z) relativ zur Hüfte."""
+    a = math.radians(thigh_deg)
+    b = a - math.radians(flex_deg)
+    return (
+        THIGH_LEN * math.sin(a) + SHIN_LEN * math.sin(b),
+        -(THIGH_LEN * math.cos(a) + SHIN_LEN * math.cos(b)),
+    )
+
+
+def run_foot(u):
+    """Knöchelweg eines Fußes über den Zyklus (u = 0 bis 1, 0 = Aufsetzen): (y, z, im Stand?).
+
+    Stand: Der Fuß liegt auf dem Boden und wandert mit genau der Laufgeschwindigkeit nach hinten
+    (kein Rutschen). Schwung: Hermite-Kurve zurück nach vorn mit angehobenem Fuß.
+    """
+    s = RUN_STANCE
+    if u < s:
+        tau = u / s
+        return RUN_STRIDE_HALF * (1.0 - 2.0 * tau), ANKLE_HEIGHT, True
+    tau = (u - s) / (1.0 - s)
+    duration = (1.0 - s) * RUN_CYCLE_SECONDS
+    p0, p1 = -RUN_STRIDE_HALF, RUN_STRIDE_HALF
+    m = -RUN_SPEED * duration * RUN_TANGENT
+    h00, h10 = 2 * tau**3 - 3 * tau**2 + 1, tau**3 - 2 * tau**2 + tau
+    h01, h11 = -2 * tau**3 + 3 * tau**2, tau**3 - tau**2
+    y = h00 * p0 + h10 * m + h01 * p1 + h11 * m
+    z = ANKLE_HEIGHT + RUN_LIFT * math.sin(math.pi * tau) ** 0.9
+    return y, z, False
+
+
+def run_hips_dz(u):
+    """Hüfthöhe: in der Standphase eines Beins eingefedert, in der Flugphase leicht angehoben."""
+    s = RUN_STANCE
+    u_leg = u % 0.5 * 1.0  # beide Beine wechseln sich ab: Halbzyklus
+    half = 0.5
+    if u_leg < s:
+        return RUN_DZ_STAND - RUN_DZ_COMPRESS * math.sin(math.pi * u_leg / s)
+    flight = (u_leg - s) / (half - s)
+    return RUN_DZ_STAND + RUN_DZ_FLIGHT * math.sin(math.pi * flight)
+
+
+def run_legs(u):
+    """Winkel beider Beine und Hüfthöhe: {l: (thigh, flex, im Stand?, erreicht?)}, dz."""
+    dz = run_hips_dz(u)
+    legs_out = {}
+    for name, offset in (("l", 0.0), ("r", 0.5)):
+        y, z, stance = run_foot((u + offset) % 1.0)
+        z_rel = z - (HIP_HEIGHT + dz)
+        thigh, flex, reached = leg_ik(y, z_rel)
+        legs_out[name] = (thigh, flex, stance, reached, y)
+    return legs_out, dz
 
 
 def run_pose(t):
     p = 2 * math.pi * t
+    legs_out, dz = run_legs(t)
     pose = {}
-    thighs, knees = {}, {}
-    for n, off in (("l", 0.0), ("r", math.pi)):
-        th = p + off
-        thighs[n] = 46 * math.sin(th) + 6
-        knees[n] = 14 + 78 * max(0.0, math.cos(th - 0.35)) ** 1.4
-    legs_pose, dz = legs(thighs["l"], knees["l"], thighs["r"], knees["r"])
-    pose.update(legs_pose)
-    pose.update(hips_pose(dz, pitch=-6, yaw=7 * math.sin(p), roll=3 * math.sin(p)))
-    pose["spine"] = (-7, 0, -6 * math.sin(p))
-    pose["chest"] = (-7, 0, -6 * math.sin(p))
-    pose["head"] = (10, 0, 2 * math.sin(p))
-    for n, off in (("l", math.pi), ("r", 0.0)):  # Arm gegenläufig zum gleichseitigen Bein
-        th = p + off
-        pose[f"upper_arm_{n}"] = (-44 * math.sin(th) + 6, 0, -8 if n == "l" else 8)
-        pose[f"forearm_{n}"] = (72 + 20 * math.cos(th), 0, 0)
-        pose[f"hand_{n}"] = (6, 0, 0)
-    pose.update(scarf(-22 + 8 * math.sin(2 * p + 0.5), -12 + 10 * math.sin(2 * p - 0.3), -4 + 12 * math.sin(2 * p - 1.0), 7 * math.sin(p)))
+    for name, (thigh, flex, stance, _reached, _y) in legs_out.items():
+        pose[f"thigh_{name}"] = (thigh, 0, 0)
+        pose[f"shin_{name}"] = (-flex, 0, 0)
+        # Fuß flach im Stand, in der Schwungphase leicht nach unten gestreckt
+        foot = (flex - thigh) + (0.0 if stance else -18.0)
+        pose[f"foot_{name}"] = (foot, 0, 0)
+    pose.update(hips_pose(dz, yaw=5 * math.sin(p), roll=2.5 * math.sin(p)))
+    pose["spine"] = (-8, 0, -5 * math.sin(p))
+    pose["chest"] = (-6, 0, -5 * math.sin(p))
+    pose["head"] = (12, 0, 1.5 * math.sin(p))
+    # Arme gegenläufig zu den Beinen: linker Arm hinten, wenn das linke Bein vorn aufsetzt
+    for name, sign in (("l", -1.0), ("r", 1.0)):
+        swing = sign * 52 * math.cos(p)
+        pose[f"upper_arm_{name}"] = (swing + 4, 0, -7 if name == "l" else 7)
+        pose[f"forearm_{name}"] = (88 + 14 * sign * math.cos(p), 0, 0)
+        pose[f"hand_{name}"] = (6, 0, 0)
+    # Schal: weht fast waagerecht nach hinten, Welle läuft zum Ende hin
+    pose.update(
+        scarf(
+            -4 + 7 * math.sin(2 * p),
+            -8 + 9 * math.sin(2 * p - 0.9),
+            -8 + 11 * math.sin(2 * p - 1.8),
+            6 * math.sin(p),
+        )
+    )
     return pose
+
+
+def run_report():
+    """Prüfzahlen des Laufzyklus: Rutschen, Reichweite, Kniebeugung, Körperauf und -ab."""
+    n = 170
+    clamped = 0
+    flex_min, flex_max = 999.0, 0.0
+    dz_min, dz_max = 999.0, -999.0
+    max_err = 0.0
+    stance_speeds = []
+    previous = None
+    for i in range(n + 1):
+        u = i / n
+        legs_out, dz = run_legs(u)
+        dz_min, dz_max = min(dz_min, dz), max(dz_max, dz)
+        for name, (thigh, flex, stance, reached, y) in legs_out.items():
+            clamped += 0 if reached else 1
+            flex_min, flex_max = min(flex_min, flex), max(flex_max, flex)
+            fy, _fz = leg_foot(thigh, flex)
+            if reached:
+                max_err = max(max_err, abs(fy - y))
+        # Standfuß: Geschwindigkeit des Knöchels relativ zur Hüfte
+        l_thigh, l_flex, l_stance, _r, _y = legs_out["l"]
+        fy_now, _ = leg_foot(l_thigh, l_flex)
+        if previous is not None and previous[1] and l_stance:
+            stance_speeds.append(-(fy_now - previous[0]) / (RUN_CYCLE_SECONDS / n))
+        previous = (fy_now, l_stance)
+    avg = sum(stance_speeds) / len(stance_speeds) if stance_speeds else 0.0
+    print(
+        "Laufzyklus: Zyklus %.2f s, Kontakt %.2f s, Standfuß %.2f m/s (Soll %.1f), "
+        "Kniebeugung %.0f bis %.0f Grad, Hüfte %.1f bis %.1f cm, nicht erreicht: %d, FK-Abweichung %.4f m"
+        % (RUN_CYCLE_SECONDS, RUN_CONTACT_SECONDS, avg, RUN_SPEED, flex_min, flex_max,
+           dz_min * 100, dz_max * 100, clamped, max_err)
+    )
 
 
 def sneak_pose(t):
@@ -466,7 +706,7 @@ def land_pose(t):
 
 CLIPS = [
     ("idle-loop", 60, idle_pose, True),
-    ("run-loop", 18, run_pose, True),
+    ("run-loop", RUN_FRAMES, run_pose, True),
     ("sneak-loop", 36, sneak_pose, True),
     ("sneak_idle-loop", 60, sneak_idle_pose, True),
     ("jump", 10, jump_pose, False),
@@ -483,6 +723,7 @@ def build_actions(rig):
 def setup_render(width, height):
     scene = bpy.context.scene
     scene.render.engine = "CYCLES"
+    scene.view_settings.view_transform = "Standard"
     scene.cycles.device = "CPU"
     scene.cycles.samples = 20
     scene.render.resolution_x = width
@@ -503,7 +744,7 @@ def setup_render(width, height):
     bpy.context.scene.collection.objects.link(fill_obj)
     cam_data = bpy.data.cameras.new("Kamera")
     cam_data.type = "ORTHO"
-    cam_data.ortho_scale = 2.4
+    cam_data.ortho_scale = 1.9
     cam = bpy.data.objects.new("Kamera", cam_data)
     bpy.context.scene.collection.objects.link(cam)
     scene.camera = cam
@@ -524,9 +765,9 @@ def setup_render(width, height):
 
 
 VIEWS = {
-    "seite": ((5.0, 0.0, 0.95), (90, 0, 90)),
-    "vorn": ((0.0, 5.0, 0.95), (90, 0, 180)),
-    "hinten": ((0.0, -5.0, 0.95), (90, 0, 0)),
+    "seite": ((5.0, 0.0, 0.74), (90, 0, 90)),
+    "vorn": ((0.0, 5.0, 0.74), (90, 0, 180)),
+    "hinten": ((0.0, -5.0, 0.74), (90, 0, 0)),
 }
 
 
@@ -542,14 +783,19 @@ def render_pose(rig, cam, action, frame, view, path):
 
 def make_previews(rig, actions, folder):
     os.makedirs(folder, exist_ok=True)
+    for obj in bpy.data.objects:
+        if obj.name == "NinjaUmriss":
+            obj.hide_render = True
     cam = setup_render(330, 420)
     shots = [
         ("idle-loop", 0, "vorn"),
         ("idle-loop", 0, "seite"),
         ("idle-loop", 0, "hinten"),
         ("run-loop", 0, "seite"),
+        ("run-loop", 3, "seite"),
         ("run-loop", 5, "seite"),
-        ("run-loop", 9, "seite"),
+        ("run-loop", 8, "seite"),
+        ("run-loop", 11, "seite"),
         ("run-loop", 14, "seite"),
         ("sneak-loop", 0, "seite"),
         ("sneak-loop", 18, "seite"),
@@ -576,6 +822,7 @@ def export_glb(path):
         export_force_sampling=True,
         export_optimize_animation_size=True,
         export_materials="EXPORT",
+        export_vertex_color="ACTIVE",
         export_cameras=False,
         export_lights=False,
     )
@@ -594,6 +841,10 @@ def main():
     mesh_obj.parent = arm_obj
     modifier = mesh_obj.modifiers.new("Skelett", "ARMATURE")
     modifier.object = arm_obj
+    outline_obj = build_outline(mesh_obj)
+    outline_obj.parent = arm_obj
+    outline_mod = outline_obj.modifiers.new("Skelett", "ARMATURE")
+    outline_mod.object = arm_obj
 
     bpy.context.view_layer.objects.active = arm_obj
     bpy.ops.object.mode_set(mode="POSE")
@@ -601,11 +852,12 @@ def main():
     actions = build_actions(rig)
     bpy.ops.object.mode_set(mode="OBJECT")
 
+    run_report()
     if preview:
         make_previews(rig, actions, preview)
     export_glb(out)
     tris = sum(len(p.vertices) - 2 for p in mesh_obj.data.polygons)
-    print(f"Fertig: {out} – {len(mesh_obj.data.vertices)} Punkte, {tris} Dreiecke, {len(actions)} Animationen")
+    print(f"Fertig: {out} – {len(mesh_obj.data.vertices)} Punkte, {tris} Dreiecke (Umriss-Mesh zusätzlich), {len(actions)} Animationen")
 
 
 main()

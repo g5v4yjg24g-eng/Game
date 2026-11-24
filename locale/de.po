@@ -8,3 +8,6 @@ msgstr "Sprung"
 
 msgid "HUD_SNEAK"
 msgstr "Schleichen"
+
+msgid "HUD_STYLE"
+msgstr "Stil"

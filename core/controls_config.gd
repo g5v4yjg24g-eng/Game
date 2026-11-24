@@ -14,18 +14,28 @@ const BUTTON_RADIUS := 52.0
 const BUTTON_MARGIN := 36.0
 const BUTTON_GAP := 24.0
 const BUTTON_HIT_SCALE := 1.25
+## Kleiner Testknopf oben rechts (Cartoon-Stil an/aus), nur solange der Stil geprüft wird.
+const STYLE_BUTTON_RADIUS := 30.0
 
 # Kamera
 const MIN_PITCH_DEG := -65.0
 const MAX_PITCH_DEG := 25.0
 const START_PITCH_DEG := -14.0
-const CAMERA_DISTANCE := 5.0
-const CAMERA_HEIGHT := 1.5
+const CAMERA_DISTANCE := 4.0
+const CAMERA_HEIGHT := 1.15
 const CAMERA_FOLLOW_SPEED := 12.0
+## Kamera-Schwenk im Stillstand (Wunsch Nutzer: nach 10 bis 15 Sekunden ohne Bewegung).
+const IDLE_CAMERA_DELAY := 12.0
+## Drehgeschwindigkeit um die Figur in Grad pro Sekunde (ein voller Kreis dauert 30 Sekunden).
+const IDLE_CAMERA_SPEED := 12.0
+## Sanftes Anfahren und schnelles Abbrechen bei der ersten Eingabe (Sekunden).
+const IDLE_CAMERA_RAMP_IN := 2.5
+const IDLE_CAMERA_RAMP_OUT := 0.35
 
 # Bewegung
-const RUN_SPEED := 6.5
-const SNEAK_SPEED := 2.4
+## Entwurfstempo des Laufzyklus: gleich RUN_SPEED in tools/blender/build_ninja.py (Test prüft das).
+const RUN_SPEED := 5.2
+const SNEAK_SPEED := 1.9
 const ACCELERATION := 38.0
 const TURN_SPEED := 14.0
 const JUMP_SPEED := 7.0

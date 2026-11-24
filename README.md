@@ -45,6 +45,8 @@ Kein Web-Spiel, keine PWA.
 - **Links** irgendwo aufsetzen und ziehen: schwebender Joystick, die Figur läuft relativ zur Kamera.
 - **Rechte Hälfte** wischen: Kamera drehen und neigen.
 - **Knöpfe rechts unten:** Sprung, Schleichen (Umschalter).
+- **Stillstand:** Nach 12 Sekunden ohne Bewegung und Eingabe schwenkt die Kamera langsam um die Figur; jede Eingabe stoppt sie.
+- **Knopf „Stil“ oben rechts:** Cartoon-Stil an/aus (Testknopf, siehe `docs/STIL_CARTOON.md`).
 - Werte (Empfindlichkeit, Tempo, Totzone, Knopfgrößen) stehen gesammelt in `core/controls_config.gd`.
 - Am Mac/PC lässt sich mit der Maus testen (`emulate_touch_from_mouse`).
 

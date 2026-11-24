@@ -120,6 +120,41 @@ func _ready() -> void:
 	)
 	bus.move_input.emit(Vector2.ZERO)
 
+	# Stillstands-Schwenk: Die Kamera dreht sich erst nach der Wartezeit und stoppt bei Eingabe
+	rig.set_process(false)
+	bus.move_input.emit(Vector2.ZERO)
+	await _frames(60)
+	var step := 1.0 / 60.0
+	var yaw_start := rig.yaw_deg
+	for i in int((ControlsConfig.IDLE_CAMERA_DELAY - 2.0) / step):
+		rig._process(step)
+	_check(
+		absf(angle_difference(deg_to_rad(rig.yaw_deg), deg_to_rad(yaw_start))) < 0.01,
+		"Vor der Wartezeit bleibt die Kamera stehen (yaw %.2f)" % rig.yaw_deg
+	)
+	for i in int(12.0 / step):
+		rig._process(step)
+	var turned := absf(angle_difference(deg_to_rad(rig.yaw_deg), deg_to_rad(yaw_start)))
+	_check(
+		turned > deg_to_rad(20.0),
+		"Nach der Wartezeit schwenkt die Kamera (%.0f Grad)" % rad_to_deg(turned)
+	)
+	bus.look_input.emit(Vector2.ZERO)
+	bus.activity.emit()
+	for i in int(1.0 / step):
+		rig._process(step)
+	var yaw_stopped := rig.yaw_deg
+	for i in int(1.0 / step):
+		rig._process(step)
+	_check(
+		(
+			absf(angle_difference(deg_to_rad(rig.yaw_deg), deg_to_rad(yaw_stopped))) < 0.01
+			and rig.idle_strength() == 0.0
+		),
+		"Eine Eingabe stoppt den Schwenk"
+	)
+	rig.set_process(true)
+
 	# Absturz: Figur kehrt zum Startpunkt zurück
 	player.global_position = Vector3(0, -30, 0)
 	await _frames(3)

@@ -20,4 +20,7 @@ func _ready() -> void:
 	var hud := CanvasLayer.new()
 	add_child(hud)
 	hud.add_child(TouchControls.new())
+	var style := CartoonStyle.new()
+	style.root = self
+	add_child(style)
 	add_child(DebugOverlay.new())

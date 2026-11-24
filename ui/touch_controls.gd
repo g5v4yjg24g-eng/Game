@@ -15,6 +15,7 @@ var _joystick := JoystickLogic.new()
 var _look_finger := -1
 var _jump_finger := -1
 var _sneaking := false
+var _cartoon := false
 var _insets := {"left": 0.0, "top": 0.0, "right": 0.0, "bottom": 0.0}
 
 
@@ -55,11 +56,16 @@ func _draw() -> void:
 		draw_arc(hint, radius, 0.0, TAU, 64, COLOR_HINT, 2.0, true)
 	_draw_button(TouchLayout.Zone.JUMP, tr("HUD_JUMP"), _jump_finger != -1)
 	_draw_button(TouchLayout.Zone.SNEAK, tr("HUD_SNEAK"), _sneaking)
+	_draw_button(TouchLayout.Zone.STYLE, tr("HUD_STYLE"), _cartoon)
 
 
 func _draw_button(zone: TouchLayout.Zone, text: String, on: bool) -> void:
 	var center := TouchLayout.button_center(zone, get_viewport_rect().size, _insets)
-	var r := ControlsConfig.BUTTON_RADIUS
+	var r := (
+		ControlsConfig.STYLE_BUTTON_RADIUS
+		if zone == TouchLayout.Zone.STYLE
+		else ControlsConfig.BUTTON_RADIUS
+	)
 	draw_circle(center, r, COLOR_BUTTON_ON if on else COLOR_BUTTON)
 	draw_arc(center, r, 0.0, TAU, 48, COLOR_RING, 2.0, true)
 	var font := ThemeDB.fallback_font
@@ -77,6 +83,7 @@ func _draw_button(zone: TouchLayout.Zone, text: String, on: bool) -> void:
 
 
 func _on_press(index: int, position: Vector2) -> void:
+	EventBus.activity.emit()
 	match TouchLayout.zone_at(position, get_viewport_rect().size, _insets):
 		TouchLayout.Zone.JOYSTICK:
 			if not _joystick.active:
@@ -91,6 +98,9 @@ func _on_press(index: int, position: Vector2) -> void:
 		TouchLayout.Zone.SNEAK:
 			_sneaking = not _sneaking
 			EventBus.sneak_changed.emit(_sneaking)
+		TouchLayout.Zone.STYLE:
+			_cartoon = not _cartoon
+			EventBus.style_changed.emit(_cartoon)
 	queue_redraw()
 
 

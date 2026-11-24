@@ -1,5 +1,40 @@
 # Changelog
 
+## 2026-11-24 – Kampfhaltung und Kamera-Schwenk im Stillstand (Branch `claude/cartoon-vorbereitung`)
+- Nutzer: Figur gefällt; Ruhepose soll die **Kampfhaltung** sein; nach 10 bis 15 Sekunden Stillstand soll die Kamera **um die Figur schwenken** wie in bekannten Spielen.
+- Neue `idle`-Animation im Blender-Skript: breiter, tiefer Stand (Beine gespreizt, Knie gebeugt), Fäuste vor Brust und Kinn, Ellbogen nach außen, leichtes Atmen und Schwanken, Stirnband-Enden wehen leicht.
+- Kamera-Schwenk: Regel als reine Logik (`gameplay/idle_camera.gd`, Wartezeit 12 s, 12 Grad/s, sanftes Anfahren, schnelles Abbrechen), eingebunden in `CameraRig`; `Player.is_at_rest()`; neues Signal `EventBus.activity` für jede Berührung.
+- Tests: 98 Logik-Tests (neu: Schwenk-Regel), Simulation prüft, dass die Kamera vor der Wartezeit stehen bleibt, danach schwenkt und bei Eingabe stoppt.
+- Nicht belegt: Wirkung und Gefühl am iPhone.
+
+
+## 2026-11-24 – Figur nach Referenz umgebaut (Branch `claude/cartoon-vorbereitung`)
+- Anlass: Nutzer meldet, der Lauf sehe besser aus, aber die Knie gingen zu weit hoch, und schlägt vor, **zuerst die Figur wie angefordert neu zu bauen und dann die Animationen zu perfektionieren**.
+- Neue Figur im Blender-Skript (Chibi, 1,45 m): großer Kopf, Kapuze mit Maske, große Augen mit zornigen Brauen, rotes Stirnband mit Spitzen und flatternden Enden, rote Schulterpolster, Gürtelknoten, Wickelkragen, rote Knieschützer, Fäuste, Stiefel, Schwert. Skelett weiter 21 Knochen (Schal-Kette heißt jetzt `band_1` bis `band_3`).
+- Umriss: dünne Teile bekommen über die Vertexfarbe einen schmaleren Umriss (Stirnband-Enden, Schwert).
+- Laufzyklus an die kürzeren Beine angepasst: Entwurfstempo 5,2 m/s, Zyklus 0,53 s, Kontakt 0,07 s, **Kniebeugung bis 73 Grad** (vorher 109), Standfuß gemessen 5,20 m/s (kein Rutschen), nichts gekürzt.
+- Spielwerte der Größe angepasst (Vorschlag, zurückstellbar): Lauftempo 5,2, Schleichen 1,9, Kamera 4,0 m und Zielhöhe 1,15 m, Kollisionsform 1,45 m. Sprungstärke unverändert.
+- Cartoon-Schattierung etwas gedämpft (Lichtstufe 0,7, Mittelstufe 0,38), weil die anthrazitfarbene Kleidung im Licht beige-grau wirkte.
+- Tests von festen Tempo- und Bildzahlen gelöst (Entwurfstempo und Zyklusdauer werden aus dem Blender-Skript gelesen); 89 Tests, beide Simulationen und die Render-Prüfung im Mobile-Renderer grün.
+- Nicht belegt: Aussehen am iPhone. Animationen sind **noch nicht perfektioniert** (nach Freigabe der Figur).
+
+
+## 2026-11-24 – Laufanimation neu (Branch `claude/cartoon-vorbereitung`)
+- Anlass: Nutzer meldet nach Build 6, dass die Laufanimation komisch aussieht. Befund aus den Aufnahmen: Schal stand fast senkrecht, Füße rutschten (Zyklus 0,6 s passte nicht zu 6,5 m/s), Gang wie ein Ausfallschritt ohne Flugphase.
+- Neuer Laufzyklus im Blender-Skript: Fußführung per Zwei-Gelenk-Berechnung. Der Standfuß wandert exakt mit der Laufgeschwindigkeit nach hinten (gemessen 6,50 m/s bei Soll 6,5, also kein Rutschen), Zyklus 0,57 s, Bodenkontakt 0,11 s je Fuß mit Flugphase, Hüfte federt 3,5 bis 11 cm ein, Knie bis 109 Grad, Schal weht fast waagerecht, Arme gebeugt im Gegentakt, leichte Vorlage.
+- Neue Prüfungen: Entwurfstempo im Blender-Skript muss `RUN_SPEED` im Spiel entsprechen; alle sieben Animationen und die Länge des Laufzyklus werden aus dem importierten Modell geprüft (88 Tests insgesamt).
+- Nicht belegt: ob der Lauf am iPhone besser aussieht (nur der Nutzer kann das prüfen).
+
+
+## 2026-11-24 – Vorbereitung Cartoon-Stil (Branch `claude/cartoon-vorbereitung`)
+- Shader für Cartoon-Schattierung (drei Stufen) und Umriss (Inverted Hull), beide für den Mobile-Renderer; Standard **aus**.
+- `CartoonStyle` schaltet Figur und Welt um; Figur mit eigenem Umriss-Mesh im Modell, statische Teile mit gemittelten Normalen (`SmoothNormals`, mit Tests).
+- Testknopf „Stil“ oben rechts und Stilanzeige in der Messanzeige, damit der Nutzer am iPhone vergleichen kann.
+- Prüfungen: 75 Logik-Tests, Simulation für Ein- und Ausschalten, neuer CI-Job `mobile-renderer` (echter Mobile-Renderer per Software-Vulkan, meldet Shader-Fehler).
+- Stil-Leitfaden `docs/STIL_CARTOON.md` mit Regeln, Messungen (Draw Calls im Cartoon-Modus etwa 20 bis 45 % höher) und offenen Punkten.
+- Bildratendeckel von 60 auf 120 fps angehoben (Test, weil der Nutzer „noch nicht so flüssig“ meldet; das Display kann 120 Hz, die App erlaubt es im Export).
+- Noch nicht am iPhone gesehen; Figur und Welt sind noch nicht im Referenzstil umgebaut.
+
 ## 2026-11-24 – Ninja-Modell (Branch `claude/ninja-modell`)
 - Neue Spielfigur statt Platzhalter: eigenes Modell aus `tools/blender/build_ninja.py` (Skelett mit 21 Knochen, Schal-Kette, etwa 7 000 Dreiecke).
 - Sieben Animationen: `idle`, `run`, `sneak`, `sneak_idle`, `jump`, `fall`, `land`; Tempo der Schritte passt sich der Geschwindigkeit an, weiche Übergänge.

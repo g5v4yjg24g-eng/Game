@@ -17,3 +17,9 @@ signal look_input(drag: Vector2)
 signal jump_pressed
 ## Schleichen wurde ein- oder ausgeschaltet.
 signal sneak_changed(active: bool)
+
+## Cartoon-Darstellung wurde ein- oder ausgeschaltet (Vorbereitung Phase 3c, Testknopf).
+signal style_changed(cartoon: bool)
+
+## Irgendeine Berührung des Bildschirms (setzt z. B. den Stillstands-Schwenk der Kamera zurück).
+signal activity

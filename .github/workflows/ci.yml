@@ -49,3 +49,32 @@ jobs:
         run: |
           ./godot --headless --path . --quit-after 30 2>&1 | tee start.log
           if grep -E "SCRIPT ERROR|ERROR:" start.log; then exit 1; fi
+
+  # Shader und Cartoon-Stil im echten Mobile-Renderer (Software-Vulkan, keine GPU nötig).
+  # Zeigt Shader-Fehler, die der Headless-Lauf nicht sieht. Bildraten sind hier nicht aussagekräftig.
+  mobile-renderer:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          lfs: true
+      - name: Software-Vulkan und virtuelles Display
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq xvfb mesa-vulkan-drivers libvulkan1
+          ls /usr/share/vulkan/icd.d
+      - name: Godot laden
+        run: |
+          curl -fsSL -o godot.zip "https://github.com/godotengine/godot-builds/releases/download/${GODOT_VERSION}-stable/Godot_v${GODOT_VERSION}-stable_linux.x86_64.zip"
+          unzip -q godot.zip
+          mv Godot_v${GODOT_VERSION}-stable_linux.x86_64 godot && chmod +x godot
+      - name: Projekt importieren
+        run: ./godot --headless --path . --import
+      - name: Prototyp mit Cartoon-Stil im Mobile-Renderer rendern
+        run: |
+          export VK_ICD_FILENAMES=$(ls /usr/share/vulkan/icd.d/lvp_icd*.json | head -1)
+          xvfb-run -a -s "-screen 0 1280x590x24" ./godot --path . --rendering-method mobile --rendering-driver vulkan res://tests/render_check.tscn 2>&1 | tee render.log
+          if grep -E "SHADER ERROR|Shader compilation failed|SCRIPT ERROR|Parse Error|FEHLER" render.log; then exit 1; fi
+          grep -q "Render-Prüfung (mobile): alles bestanden" render.log
+

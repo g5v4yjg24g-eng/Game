@@ -66,6 +66,11 @@ func _on_sneak_changed(active: bool) -> void:
 	_sneaking = active
 
 
+## Steht die Figur still (am Boden, ohne Eingabe und praktisch ohne Geschwindigkeit)?
+func is_at_rest() -> bool:
+	return is_on_floor() and _move_input.length() < 0.01 and velocity.length() < 0.1
+
+
 ## Name der laufenden Animation (für Tests).
 func current_animation() -> StringName:
 	return _animation.current_animation if _animation != null else &""
@@ -74,10 +79,10 @@ func current_animation() -> StringName:
 func _build_collision() -> void:
 	var shape := CapsuleShape3D.new()
 	shape.radius = 0.3
-	shape.height = 1.8
+	shape.height = 1.45
 	var body := CollisionShape3D.new()
 	body.shape = shape
-	body.position.y = 0.9
+	body.position.y = 0.725
 	add_child(body)
 
 

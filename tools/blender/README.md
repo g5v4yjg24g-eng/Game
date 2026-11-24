@@ -12,7 +12,7 @@ Mit Vorschau-Ordner werden Bilder einzelner Posen gerendert (Cycles auf der CPU,
 Danach in Godot importieren (`godot --headless --path . --import`) und Tests laufen lassen.
 
 ## Konventionen
-- Maße in Metern, Füße bei z = 0, Körpergröße etwa 1,85 m. Blickrichtung im Blender-Raum +Y (wird im glTF zu -Z, wie Godot es erwartet).
+- Maße in Metern, Füße bei z = 0, Körpergröße etwa 1,45 m (Chibi). Blickrichtung im Blender-Raum +Y (wird im glTF zu -Z, wie Godot es erwartet).
 - Animationsnamen mit Endung `-loop` wiederholt Godot beim Import (ohne Endung: einmalig). Die Endung verschwindet beim Import: im Spiel heißen die Clips `idle`, `run`, `sneak`, `sneak_idle`, `jump`, `fall`, `land`.
 - Die Namen stehen in `gameplay/animation_logic.gd`; neue Clips dort und im Skript (`CLIPS`) ergänzen.
 - Die `.glb` liegt in Git LFS (`assets/**/*.glb`).
