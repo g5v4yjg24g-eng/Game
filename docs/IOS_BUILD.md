@@ -23,12 +23,12 @@ Zugangsdaten stehen nie im Repo. Im Preset steht nur der Platzhalter `TEAM_ID`; 
 
 ## Geprüft und ungeprüft
 - **Geprüft (2026-11-24, Linux, Godot 4.5.1):** Der Export erzeugt `build/ios/Kagero.xcodeproj` mit Bundle-ID `com.fangpunkt.game`, Team-ID, Mindest-iOS 15.0, nur iPhone, Querformat, App-Icon und gemeinsamem Schema `Kagero`.
-- **Erster Lauf auf GitHub (2026-11-24, Run 1, `macos-15-intel`, Branch `claude/phase-2-grundgeruest`):**
-  - Erfolgreich: Secrets vorhanden, Godot und Export-Templates geladen, Import, Export zum Xcode-Projekt, Xcode gewählt, **Archiv gebaut** (`ARCHIVE SUCCEEDED`).
-  - **Fehlgeschlagen:** „Für den App Store signieren und zu TestFlight hochladen“ mit `Auth error` (CDWebService Code 1235) und `No Accounts with App Store Connect Access`. Apple hat die API-Zugangsdaten abgelehnt. Das Spiel selbst ist nicht die Ursache.
-  - Mögliche Ursachen (Prüfung siehe unten): Key-ID, Issuer-ID und `.p8` gehören nicht zusammen, ein Wert ist abgeschnitten oder hat Leerzeichen, es ist ein individueller statt ein Teamschlüssel, oder der Schlüssel hat zu wenig Rechte oder wurde widerrufen.
+- **Läufe auf GitHub (2026-11-24, `macos-15-intel`):**
+  - Lauf 1 und 2 (alter Branch): Export und Archiv liefen, Signieren und Upload scheiterten mit `Auth error` (Code 1235, `No Accounts with App Store Connect Access`).
+  - Lauf 3 (`main`): Der Prüfschritt zeigte, dass die Form der Werte stimmte, Apple die Zugangsdaten aber ablehnte (HTTP 401). Key-ID, Issuer-ID und `.p8` gehörten nicht zusammen. Der Nutzer hat einen neuen Teamschlüssel erstellt und alle drei Secrets ersetzt.
+  - **Lauf 4 (`main`, Commit `b80ac6c`): alle Schritte grün**, auch „Für den App Store signieren und zu TestFlight hochladen“ (Dauer gesamt etwa 5 Minuten).
 - **Zugangsdaten-Prüfung:** Der Schritt „Zugangsdaten bei Apple prüfen“ (`ios/check-asc.mjs`) läuft jetzt vor dem Godot-Export. Er prüft die Form der Werte, liest die `.p8`, fragt die App-Store-Connect-API nach der Bundle-ID und nennt die Ursache, ohne Schlüssel auszugeben.
-- **[O] Noch ungeprüft:** der TestFlight-Upload selbst, der Start des Builds auf dem iPhone und ob die Xcode-Version des Runners für TestFlight reicht (das Archiv wurde damit gebaut, Apples Mindest-SDK-Prüfung kommt erst beim Upload).
+- **[O] Noch ungeprüft:** Ob der Build in App Store Connect unter TestFlight erscheint und von Apple verarbeitet wird (der Upload-Schritt war grün, die Bestätigung durch den Nutzer fehlt), und der Start des Spiels auf dem iPhone.
 - **Testgerät:** iPhone 16 Pro Max mit iOS 27.2.1. **[O] Mindest-iOS 15.0** ist vorläufig.
 
 ## Release-Checkliste (später)

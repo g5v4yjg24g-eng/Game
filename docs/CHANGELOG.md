@@ -1,5 +1,10 @@
 # Changelog
 
+## 2026-11-24 – Erster erfolgreicher iPhone-Build
+- Lauf 4 des Workflows „iPhone-Build (TestFlight)“ auf `main`: alle Schritte grün (Zugangsdaten-Prüfung, Godot-Export, Archiv, Signieren und Upload).
+- Ursache der früheren Fehler: nicht zusammenpassende App-Store-Connect-Zugangsdaten (Secrets neu gesetzt).
+- Offen: Bestätigung, dass der Build in TestFlight erscheint und auf dem iPhone startet.
+
 ## 2026-11-24 – Zugangsdaten-Prüfung für den iOS-Build
 - Erster iPhone-Build: Export und Archiv liefen, der Upload scheiterte an der Anmeldung bei App Store Connect (Auth error 1235).
 - Neuer Schritt „Zugangsdaten bei Apple prüfen“ (`ios/check-asc.mjs`) vor dem Godot-Export, damit die Ursache früh und genau gemeldet wird.

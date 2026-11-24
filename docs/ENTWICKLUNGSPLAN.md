@@ -21,7 +21,8 @@ Jede Phase endet mit einem getesteten Stand und einem Eintrag im [Changelog](CHA
 - [x] CI-Workflow auf Linux angelegt
 - [ ] CI-Workflow auf GitHub gelaufen und grün (erst nach dem Push prüfbar)
 - [x] iOS-Export als Xcode-Projekt unter Linux erzeugt und geprüft (siehe [IOS_BUILD.md](IOS_BUILD.md))
-- [ ] iOS-Workflow auf macOS gelaufen, Build in TestFlight (nur der Nutzer kann ihn auslösen)
+- [x] iOS-Workflow auf macOS gelaufen (Lauf 4, alle Schritte grün, 2026-11-24)
+- [ ] Build in TestFlight sichtbar und auf dem iPhone 16 Pro Max gestartet (Bestätigung durch den Nutzer)
 
 ## Qualität und Performance (ab Phase 3 messen)
 Ziel 60 fps (Sparmodus 30), Frame-Zeit-Overlay im Debug-Build, Draw-Call- und Speicherbudget, ASTC-Texturen, LODs, Streaming der Weltabschnitte. Messen kann nur der Nutzer am Gerät; Claude wertet die Rückmeldung aus.
