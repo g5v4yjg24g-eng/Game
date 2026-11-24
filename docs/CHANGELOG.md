@@ -7,3 +7,4 @@
 - iOS-Workflow (macOS) für Build und TestFlight, noch nicht gelaufen.
 - Export-Preset für iOS (`com.fangpunkt.game`); der Export zum Xcode-Projekt wurde unter Linux geprüft.
 - Dokumente: Konzept, Entscheidungen, Entwicklungsplan, iOS-Build.
+- Testgerät festgehalten: iPhone 16 Pro Max, iOS 27.2.1.

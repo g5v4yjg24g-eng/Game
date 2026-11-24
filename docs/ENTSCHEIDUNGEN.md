@@ -22,5 +22,6 @@
 | Name des Spiels | **Offen** | Endgültiger Titel |
 | Auftraggeber, Spielziel, Enden | **Offen** | Folgt im Konzept (Phase 1) |
 | Skilltree, Waffen, Fähigkeiten | **Offen** | Folgt vor Phase 4/6 |
-| Testgerät (iPhone, iOS) | **Offen** | Bestimmt Mindest-iOS und Leistungsziele (Preset steht vorläufig auf iOS 15) |
+| Testgerät | Entschieden | iPhone 16 Pro Max, iOS 27.2.1 (2026-11-24). Leistungsziele werden an diesem Gerät gemessen; ältere Geräte später prüfen |
+| Mindest-iOS | **Offen** | Preset steht vorläufig auf iOS 15.0; endgültiger Wert hängt von der Zielgruppe ab |
 | Zusammenarbeit mit weiteren Entwicklern | **Offen** | Bestimmt Branch-Schutz und Review-Regeln |
