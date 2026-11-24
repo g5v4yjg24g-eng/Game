@@ -1,5 +1,12 @@
 # Changelog
 
+## 2026-11-24 – Laufzyklus nachgebessert (Branch `claude/lauf-schritte`)
+- Anlass: Nutzer meldet nach Build 8, das Laufen sehe aus wie Rückwärtslaufen; sonst passe alles (Figur, Kampfhaltung, Kamera-Schwenk).
+- Ursache (aus dem Video und einer Laufvorschau mit Bodenmarken): zu kleine, zu schnelle Schritte bei zu wenig Fußhöhe, der Körper glitt über die Füße.
+- Neuer Zyklus: 0,40 s, Fußweg 0,50 m, Bodenkontakt 0,12 s, Fußhöhe 8 cm, 20 % Gleiten erlaubt, Kniebeugung bis 93 Grad. Neue Vorschau im Blender-Skript: Lauf mit echtem Tempo an Bodenmarken vorbei.
+- Nicht belegt: ob der Lauf am iPhone natürlich aussieht.
+
+
 ## 2026-11-24 – Kampfhaltung und Kamera-Schwenk im Stillstand (Branch `claude/cartoon-vorbereitung`)
 - Nutzer: Figur gefällt; Ruhepose soll die **Kampfhaltung** sein; nach 10 bis 15 Sekunden Stillstand soll die Kamera **um die Figur schwenken** wie in bekannten Spielen.
 - Neue `idle`-Animation im Blender-Skript: breiter, tiefer Stand (Beine gespreizt, Knie gebeugt), Fäuste vor Brust und Kinn, Ellbogen nach außen, leichtes Atmen und Schwanken, Stirnband-Enden wehen leicht.

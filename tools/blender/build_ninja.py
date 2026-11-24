@@ -455,14 +455,15 @@ def idle_pose(t):
 
 
 # --- Laufzyklus mit Fußführung (Zwei-Gelenk-Berechnung) ----------------------------------------
-RUN_FRAMES = 16  # Bilder je Zyklus (beide Schritte), 0,53 s
+RUN_FRAMES = 12  # Bilder je Zyklus (beide Schritte), 0,4 s = 5 Schritte je Sekunde
 RUN_CYCLE_SECONDS = RUN_FRAMES / FPS
-RUN_CONTACT_SECONDS = 0.07  # Bodenkontakt je Fuß
+RUN_CONTACT_SECONDS = 0.12  # Bodenkontakt je Fuß
 RUN_STANCE = RUN_CONTACT_SECONDS / RUN_CYCLE_SECONDS  # Anteil des Zyklus im Stand
-RUN_STRIDE_HALF = RUN_SPEED * RUN_CONTACT_SECONDS / 2  # Fuß vor und hinter der Hüfte im Stand
-RUN_LIFT = 0.05  # Fußhöhe in der Schwungphase (niedrig: Kniebeugung bleibt unter etwa 75 Grad)
+RUN_GROUND_RATIO = 0.8  # Standfuß-Tempo im Verhältnis zum Körpertempo (kleiner 1 = etwas Gleiten, wie bei Cartoons)
+RUN_STRIDE_HALF = RUN_SPEED * RUN_GROUND_RATIO * RUN_CONTACT_SECONDS / 2  # Fuß vor und hinter der Hüfte im Stand
+RUN_LIFT = 0.08  # Fußhöhe in der Schwungphase (nicht zu hoch: sonst wirkt es wie eine Fersen-zum-Po-Übung)
 RUN_TANGENT = 0.2  # Anteil der Standgeschwindigkeit, der in die Schwungkurve übergeht
-RUN_DZ_STAND = -0.04  # Hüfte beim Aufsetzen und Abdrücken (relativ zum Stand)
+RUN_DZ_STAND = -0.07  # Hüfte beim Aufsetzen und Abdrücken (relativ zum Stand)
 RUN_DZ_COMPRESS = 0.01  # zusätzliches Einfedern in der Mitte der Standphase
 RUN_DZ_FLIGHT = 0.01  # Anheben in der Flugphase
 
@@ -508,7 +509,7 @@ def run_foot(u):
     tau = (u - s) / (1.0 - s)
     duration = (1.0 - s) * RUN_CYCLE_SECONDS
     p0, p1 = -RUN_STRIDE_HALF, RUN_STRIDE_HALF
-    m = -RUN_SPEED * duration * RUN_TANGENT
+    m = -RUN_SPEED * RUN_GROUND_RATIO * duration * RUN_TANGENT
     h00, h10 = 2 * tau**3 - 3 * tau**2 + 1, tau**3 - 2 * tau**2 + tau
     h01, h11 = -2 * tau**3 + 3 * tau**2, tau**3 - tau**2
     y = h00 * p0 + h10 * m + h01 * p1 + h11 * m
@@ -598,9 +599,9 @@ def run_report():
         previous = (fy_now, l_stance)
     avg = sum(stance_speeds) / len(stance_speeds) if stance_speeds else 0.0
     print(
-        "Laufzyklus: Zyklus %.2f s, Kontakt %.2f s, Standfuß %.2f m/s (Soll %.1f), "
+        "Laufzyklus: Zyklus %.2f s, Kontakt %.2f s, Standfuß %.2f m/s (Soll %.2f = Tempo mal Verhältnis), "
         "Kniebeugung %.0f bis %.0f Grad, Hüfte %.1f bis %.1f cm, nicht erreicht: %d, FK-Abweichung %.4f m"
-        % (RUN_CYCLE_SECONDS, RUN_CONTACT_SECONDS, avg, RUN_SPEED, flex_min, flex_max,
+        % (RUN_CYCLE_SECONDS, RUN_CONTACT_SECONDS, avg, RUN_SPEED * RUN_GROUND_RATIO, flex_min, flex_max,
            dz_min * 100, dz_max * 100, clamped, max_err)
     )
 
@@ -809,6 +810,43 @@ def make_previews(rig, actions, folder):
         render_pose(rig, cam, actions[name], frame, view, os.path.join(folder, f"{i:02d}_{name}_{frame}_{view}.png"))
 
 
+def make_run_strip(rig, actions, folder):
+    """Lauf mit echtem Tempo an Bodenmarken vorbei: zeigt Gleiten und Gesamteindruck."""
+    os.makedirs(folder, exist_ok=True)
+    cam = setup_render(520, 330)
+    cam.data.ortho_scale = 3.4
+    marks = bpy.data.materials.new("marke")
+    marks.use_nodes = True
+    marks.node_tree.nodes["Principled BSDF"].inputs["Base Color"].default_value = (0.9, 0.2, 0.2, 1)
+    for k in range(-14, 15):
+        mesh = bpy.data.meshes.new(f"marke{k}")
+        mb = bmesh.new()
+        bmesh.ops.create_cube(mb, size=1.0)
+        for v in mb.verts:
+            v.co = Vector((v.co.x * 0.02, v.co.y * 0.03, v.co.z * 0.10 + 0.05))
+        mb.to_mesh(mesh)
+        mb.free()
+        obj = bpy.data.objects.new(f"marke{k}", mesh)
+        obj.location = (-0.55, k * 0.25, 0)
+        if k % 4:
+            obj.data.materials.append(marks)
+        bpy.context.scene.collection.objects.link(obj)
+    for obj in bpy.data.objects:
+        if obj.name == "NinjaUmriss":
+            obj.hide_render = True
+    cam.location = (6.0, 0.0, 0.55)
+    cam.rotation_euler = [math.radians(a) for a in (90, 0, 90)]
+    action = actions["run-loop"]
+    rig.obj.animation_data.action = action
+    for i in range(RUN_FRAMES):
+        t = i / FPS
+        rig.obj.location = (0.0, RUN_SPEED * (t - RUN_CYCLE_SECONDS / 2), 0.0)
+        bpy.context.scene.frame_set(i)
+        bpy.context.scene.render.filepath = os.path.join(folder, f"strip_{i:02d}.png")
+        bpy.ops.render.render(write_still=True)
+    rig.obj.location = (0.0, 0.0, 0.0)
+
+
 def export_glb(path):
     bpy.ops.object.select_all(action="DESELECT")
     bpy.ops.export_scene.gltf(
@@ -855,6 +893,7 @@ def main():
     run_report()
     if preview:
         make_previews(rig, actions, preview)
+        make_run_strip(rig, actions, os.path.join(preview, "lauf"))
     export_glb(out)
     tris = sum(len(p.vertices) - 2 for p in mesh_obj.data.polygons)
     print(f"Fertig: {out} – {len(mesh_obj.data.vertices)} Punkte, {tris} Dreiecke (Umriss-Mesh zusätzlich), {len(actions)} Animationen")
