@@ -1,0 +1,17 @@
+# Godot 4
+.godot/
+.import/
+*.translation
+export.cfg
+export_credentials.cfg
+*.tmp
+# Builds
+build/
+*.ipa
+*.xcarchive
+# Lokale Werkzeuge
+.venv/
+__pycache__/
+.DS_Store
+# Blender-Sicherungen
+*.blend1

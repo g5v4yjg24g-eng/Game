@@ -1,0 +1,118 @@
+# iPhone-Build und Upload zu TestFlight. Läuft nur von Hand:
+# Actions → „iPhone-Build (TestFlight)“ → Run workflow. Kein eigener Mac nötig.
+#
+# Benötigte Repository-Secrets (Settings → Secrets and variables → Actions):
+#   APPLE_TEAM_ID, ASC_KEY_ID, ASC_ISSUER_ID, ASC_PRIVATE_KEY (Inhalt der .p8-Datei)
+# Signiert wird erst beim Export für den App Store über den API-Schlüssel (kein Zertifikat von Hand).
+#
+# STAND: noch nie auf GitHub gelaufen. Der Godot-Export zum Xcode-Projekt wurde mit Godot 4.5.1 unter Linux
+# geprüft; Archiv, Signieren und Upload mit Xcode sind ungeprüft (docs/IOS_BUILD.md).
+name: iPhone-Build (TestFlight)
+
+on:
+  workflow_dispatch:
+    inputs:
+      runner:
+        description: 'Mac-Typ (bei Engpass „Apple-Chip“ den Intel-Mac wählen)'
+        type: choice
+        default: macos-15-intel
+        options:
+          - macos-15-intel
+          - macos-15
+      upload:
+        description: 'Zu TestFlight hochladen (aus = nur Bauen und prüfen)'
+        type: boolean
+        default: true
+
+concurrency:
+  group: ios
+  cancel-in-progress: false
+
+env:
+  GODOT_VERSION: 4.5.1
+  BUNDLE_ID: com.fangpunkt.game
+
+jobs:
+  testflight:
+    runs-on: ${{ inputs.runner || 'macos-15-intel' }}
+    timeout-minutes: 60
+    permissions:
+      contents: read
+    env:
+      APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
+      ASC_KEY_ID: ${{ secrets.ASC_KEY_ID }}
+      ASC_ISSUER_ID: ${{ secrets.ASC_ISSUER_ID }}
+      ASC_PRIVATE_KEY: ${{ secrets.ASC_PRIVATE_KEY }}
+    steps:
+      - name: Secrets prüfen
+        run: |
+          missing=""
+          for s in APPLE_TEAM_ID ASC_KEY_ID ASC_ISSUER_ID ASC_PRIVATE_KEY; do
+            [ -n "${!s}" ] || missing="$missing $s"
+          done
+          if [ -n "$missing" ]; then
+            echo "::error::Es fehlen Secrets:$missing"; exit 1
+          fi
+      - uses: actions/checkout@v4
+        with:
+          lfs: true
+      - name: API-Schlüssel ablegen
+        run: |
+          mkdir -p "$RUNNER_TEMP/asc"
+          printf '%s' "$ASC_PRIVATE_KEY" > "$RUNNER_TEMP/asc/AuthKey.p8"
+      - name: Godot und Export-Templates laden
+        run: |
+          base="https://github.com/godotengine/godot-builds/releases/download/${GODOT_VERSION}-stable"
+          curl -fsSL -o "$RUNNER_TEMP/godot.zip" "$base/Godot_v${GODOT_VERSION}-stable_macos.universal.zip"
+          curl -fsSL -o "$RUNNER_TEMP/templates.tpz" "$base/Godot_v${GODOT_VERSION}-stable_export_templates.tpz"
+          unzip -q "$RUNNER_TEMP/godot.zip" -d "$RUNNER_TEMP/godot"
+          tdir="$HOME/Library/Application Support/Godot/export_templates/${GODOT_VERSION}.stable"
+          mkdir -p "$tdir"
+          unzip -q "$RUNNER_TEMP/templates.tpz" -d "$RUNNER_TEMP/tpl"
+          mv "$RUNNER_TEMP"/tpl/templates/* "$tdir/"
+          ls "$tdir" | head -20
+      - name: Team-ID und Buildnummer eintragen
+        run: |
+          sed -i '' "s/application\/app_store_team_id=\"TEAM_ID\"/application\/app_store_team_id=\"$APPLE_TEAM_ID\"/" export_presets.cfg
+          sed -i '' "s/^application\/version=\".*\"/application\/version=\"${{ github.run_number }}\"/" export_presets.cfg
+      - name: Godot-Projekt importieren und als Xcode-Projekt exportieren
+        run: |
+          godot="$RUNNER_TEMP/godot/Godot.app/Contents/MacOS/Godot"
+          "$godot" --headless --path . --import
+          mkdir -p build/ios
+          "$godot" --headless --path . --export-release "iOS" build/ios/Kagero.ipa
+          ls -R build/ios | head -40
+      - name: Xcode wählen (neueste installierte Version)
+        run: |
+          xc=$(ls -d /Applications/Xcode_*.app | sort -V | tail -1)
+          sudo xcode-select -s "$xc"
+          xcodebuild -version
+      # Archiv unsigniert bauen; signiert wird erst beim Export (wie bei Fangpunkt).
+      - name: Archiv bauen
+        run: |
+          proj=$(ls -d build/ios/*.xcodeproj | head -1)
+          scheme=$(basename "$proj" .xcodeproj)
+          echo "Projekt: $proj, Schema: $scheme"
+          xcodebuild archive \
+            -project "$proj" -scheme "$scheme" -configuration Release \
+            -destination 'generic/platform=iOS' \
+            -archivePath "$RUNNER_TEMP/Kagero.xcarchive" \
+            DEVELOPMENT_TEAM="$APPLE_TEAM_ID" \
+            PRODUCT_BUNDLE_IDENTIFIER="$BUNDLE_ID" \
+            CODE_SIGNING_ALLOWED=NO CODE_SIGNING_REQUIRED=NO CODE_SIGN_IDENTITY="" \
+            CURRENT_PROJECT_VERSION="${{ github.run_number }}"
+      - name: Für den App Store signieren und zu TestFlight hochladen
+        if: ${{ inputs.upload != false }}
+        run: |
+          sed "s/TEAM_ID/$APPLE_TEAM_ID/" ios/ExportOptions.plist > "$RUNNER_TEMP/ExportOptions.plist"
+          xcodebuild -exportArchive \
+            -archivePath "$RUNNER_TEMP/Kagero.xcarchive" \
+            -exportOptionsPlist "$RUNNER_TEMP/ExportOptions.plist" \
+            -exportPath "$RUNNER_TEMP/export" \
+            -allowProvisioningUpdates \
+            -authenticationKeyPath "$RUNNER_TEMP/asc/AuthKey.p8" \
+            -authenticationKeyID "$ASC_KEY_ID" \
+            -authenticationKeyIssuerID "$ASC_ISSUER_ID"
+      - name: Schlüssel entfernen
+        if: always()
+        run: rm -rf "$RUNNER_TEMP/asc"
