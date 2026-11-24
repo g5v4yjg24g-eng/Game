@@ -12,6 +12,8 @@ var _sneaking := false
 var _jump_buffer := 0.0
 var _spawn := Vector3.ZERO
 var _model: Node3D
+var _flip_pivot: Node3D
+var _flip := FlipLogic.new()
 var _animation: AnimationPlayer
 var _air_time := 0.0
 var _land_left := 0.0
@@ -45,12 +47,14 @@ func _physics_process(delta: float) -> void:
 		velocity.y = 0.0
 		if _jump_buffer > 0.0:
 			velocity.y = ControlsConfig.JUMP_SPEED
+			_flip.start()
 			_jump_buffer = 0.0
 	else:
 		velocity.y -= ControlsConfig.GRAVITY * delta
 
 	move_and_slide()
 	_update_animation(delta, horizontal.length())
+	_update_flip(delta)
 
 	if horizontal.length() > 0.2:
 		var target_yaw := MovementMath.facing_yaw(horizontal)
@@ -93,11 +97,39 @@ func _build_model() -> void:
 	if packed == null:
 		push_warning("Spielfigur nicht gefunden: %s" % MODEL_PATH)
 		return
+	# Drehpunkt in Körpermitte für den Salto; das Modell sitzt darunter und wird zurückversetzt
+	_flip_pivot = Node3D.new()
+	_flip_pivot.position.y = ControlsConfig.FLIP_CENTER_Y
+	_model.add_child(_flip_pivot)
 	var instance := packed.instantiate()
-	_model.add_child(instance)
+	instance.position.y = -ControlsConfig.FLIP_CENTER_Y
+	_flip_pivot.add_child(instance)
 	_animation = instance.find_child("AnimationPlayer", true, false) as AnimationPlayer
 	if _animation != null:
 		_animation.play(AnimationLogic.IDLE)
+
+
+## Salto vorwärts: dreht das Modell um die Körpermitte. Die Figur schaut nach -Z, vorwärts
+## heißt also negative Drehung um X (der Kopf kippt nach -Z).
+func _update_flip(delta: float) -> void:
+	_flip.step(delta, is_on_floor())
+	if _flip_pivot != null:
+		_flip_pivot.rotation.x = -deg_to_rad(_flip.angle_deg)
+
+
+## Aktueller Salto-Winkel in Grad (für Tests).
+func flip_angle_deg() -> float:
+	return -rad_to_deg(_flip_pivot.rotation.x) if _flip_pivot != null else 0.0
+
+
+## Wie weit der Kopf nach vorn (Blickrichtung des Modells) zeigt: -1 bis 1 (für Tests).
+func head_forward() -> float:
+	return -_flip_pivot.transform.basis.y.z if _flip_pivot != null else 0.0
+
+
+## Dreht die Figur gerade einen Salto (für Tests)?
+func is_flipping() -> bool:
+	return _flip.active
 
 
 func _update_animation(delta: float, speed: float) -> void:
