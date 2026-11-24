@@ -44,6 +44,8 @@ HEAD_RADII = (0.29, 0.28, 0.27)  # Kapuze: breiter als die Schultern (Chibi)
 # Entwurfstempo des Laufzyklus in m/s. Muss zu RUN_SPEED in core/controls_config.gd passen,
 # sonst rutschen die Füße.
 RUN_SPEED = 5.2
+# Entwurfstempo des Schleichens in m/s, gleich SNEAK_SPEED in core/controls_config.gd.
+SNEAK_SPEED = 1.9
 
 # --- Skelett (Armature-Raum, x = rechts, y = vorn, z = oben) -------------------------------------
 # name: (Elternknochen, Kopf, Ende)
@@ -454,18 +456,24 @@ def idle_pose(t):
     return pose
 
 
-# --- Laufzyklus mit Fußführung (Zwei-Gelenk-Berechnung) ----------------------------------------
+# --- Schrittzyklen mit Fußführung (Zwei-Gelenk-Berechnung) ----------------------------------------
 RUN_FRAMES = 12  # Bilder je Zyklus (beide Schritte), 0,4 s = 5 Schritte je Sekunde
-RUN_CYCLE_SECONDS = RUN_FRAMES / FPS
 RUN_CONTACT_SECONDS = 0.12  # Bodenkontakt je Fuß
-RUN_STANCE = RUN_CONTACT_SECONDS / RUN_CYCLE_SECONDS  # Anteil des Zyklus im Stand
 RUN_GROUND_RATIO = 0.8  # Standfuß-Tempo im Verhältnis zum Körpertempo (kleiner 1 = etwas Gleiten, wie bei Cartoons)
-RUN_STRIDE_HALF = RUN_SPEED * RUN_GROUND_RATIO * RUN_CONTACT_SECONDS / 2  # Fuß vor und hinter der Hüfte im Stand
 RUN_LIFT = 0.08  # Fußhöhe in der Schwungphase (nicht zu hoch: sonst wirkt es wie eine Fersen-zum-Po-Übung)
 RUN_TANGENT = 0.2  # Anteil der Standgeschwindigkeit, der in die Schwungkurve übergeht
 RUN_DZ_STAND = -0.07  # Hüfte beim Aufsetzen und Abdrücken (relativ zum Stand)
 RUN_DZ_COMPRESS = 0.01  # zusätzliches Einfedern in der Mitte der Standphase
 RUN_DZ_FLIGHT = 0.01  # Anheben in der Flugphase
+
+SNEAK_FRAMES = 16  # Bilder je Zyklus, 0,53 s
+SNEAK_CONTACT_SECONDS = 0.31  # Bodenkontakt je Fuß (mehr als die Hälfte des Zyklus: es gibt keinen Flug)
+SNEAK_GROUND_RATIO = 0.85
+SNEAK_LIFT = 0.04
+SNEAK_TANGENT = 0.4
+SNEAK_DZ_STAND = -0.09  # tiefe Hocke
+SNEAK_DZ_COMPRESS = 0.0
+SNEAK_DZ_BOB = 0.012  # leichtes Auf und Ab
 
 
 def leg_ik(y, z_rel):
@@ -496,71 +504,116 @@ def leg_foot(thigh_deg, flex_deg):
     )
 
 
-def run_foot(u):
-    """Knöchelweg eines Fußes über den Zyklus (u = 0 bis 1, 0 = Aufsetzen): (y, z, im Stand?).
+class Gait:
+    """Schrittzyklus: Standfuß liegt am Boden und wandert mit `ratio` mal Körpertempo nach hinten,
+    der Schwungfuß kehrt auf einer Hermite-Kurve mit angehobenem Fuß zurück. Die Hüfthöhe folgt
+    einem einfachen Auf und Ab. Mit `contact` über der Hälfte des Zyklus überlappen die Standphasen
+    (Gehen); darunter gibt es eine Flugphase (Laufen)."""
 
-    Stand: Der Fuß liegt auf dem Boden und wandert mit genau der Laufgeschwindigkeit nach hinten
-    (kein Rutschen). Schwung: Hermite-Kurve zurück nach vorn mit angehobenem Fuß.
-    """
-    s = RUN_STANCE
-    if u < s:
-        tau = u / s
-        return RUN_STRIDE_HALF * (1.0 - 2.0 * tau), ANKLE_HEIGHT, True
-    tau = (u - s) / (1.0 - s)
-    duration = (1.0 - s) * RUN_CYCLE_SECONDS
-    p0, p1 = -RUN_STRIDE_HALF, RUN_STRIDE_HALF
-    m = -RUN_SPEED * RUN_GROUND_RATIO * duration * RUN_TANGENT
-    h00, h10 = 2 * tau**3 - 3 * tau**2 + 1, tau**3 - 2 * tau**2 + tau
-    h01, h11 = -2 * tau**3 + 3 * tau**2, tau**3 - tau**2
-    y = h00 * p0 + h10 * m + h01 * p1 + h11 * m
-    z = ANKLE_HEIGHT + RUN_LIFT * math.sin(math.pi * tau) ** 0.9
-    return y, z, False
+    def __init__(self, speed, frames, contact, ratio, lift, tangent, dz_stand, dz_compress, dz_bob):
+        self.speed, self.frames, self.contact, self.ratio = speed, frames, contact, ratio
+        self.lift, self.tangent = lift, tangent
+        self.dz_stand, self.dz_compress, self.dz_bob = dz_stand, dz_compress, dz_bob
+        self.cycle = frames / FPS
+        self.stance = contact / self.cycle  # Anteil des Zyklus im Stand (je Fuß)
+        self.stride_half = speed * ratio * contact / 2  # Fuß vor und hinter der Hüfte im Stand
+
+    def foot(self, u):
+        """Knöchelweg eines Fußes (u = 0 bis 1, 0 = Aufsetzen): (y, z, im Stand?)."""
+        s = self.stance
+        if u < s:
+            return self.stride_half * (1.0 - 2.0 * u / s), ANKLE_HEIGHT, True
+        tau = (u - s) / (1.0 - s)
+        duration = (1.0 - s) * self.cycle
+        p0, p1 = -self.stride_half, self.stride_half
+        m = -self.speed * self.ratio * duration * self.tangent
+        h00, h10 = 2 * tau**3 - 3 * tau**2 + 1, tau**3 - 2 * tau**2 + tau
+        h01, h11 = -2 * tau**3 + 3 * tau**2, tau**3 - tau**2
+        y = h00 * p0 + h10 * m + h01 * p1 + h11 * m
+        z = ANKLE_HEIGHT + self.lift * math.sin(math.pi * tau) ** 0.9
+        return y, z, False
+
+    def hips_dz(self, u):
+        """Hüfthöhe relativ zum Stand."""
+        ul = u % 0.5
+        if self.stance > 0.5:  # Gehen: Hüfte etwas höher in der Mitte jedes Schritts
+            return self.dz_stand + self.dz_bob * math.sin(math.pi * ul / 0.5)
+        if ul < self.stance:  # Laufen, Standphase: eingefedert
+            return self.dz_stand - self.dz_compress * math.sin(math.pi * ul / self.stance)
+        flight = (ul - self.stance) / (0.5 - self.stance)  # Flugphase: leicht angehoben
+        return self.dz_stand + self.dz_bob * math.sin(math.pi * flight)
+
+    def legs(self, u):
+        """Beinwinkel und Hüfthöhe: ({l: (Oberschenkel, Knie, im Stand?, erreicht?, y)}, dz)."""
+        dz = self.hips_dz(u)
+        out = {}
+        for name, offset in (("l", 0.0), ("r", 0.5)):
+            y, z, stance = self.foot((u + offset) % 1.0)
+            thigh, flex, reached = leg_ik(y, z - (HIP_HEIGHT + dz))
+            out[name] = (thigh, flex, stance, reached, y)
+        return out, dz
+
+    def report(self, name):
+        """Prüfzahlen: Standfuß-Tempo, Reichweite, Kniebeugung, Hüftbewegung."""
+        n = 240
+        clamped, max_err = 0, 0.0
+        flex_min, flex_max = 999.0, 0.0
+        dz_min, dz_max = 999.0, -999.0
+        speeds = []
+        previous = None
+        for i in range(n + 1):
+            legs_out, dz = self.legs(i / n)
+            dz_min, dz_max = min(dz_min, dz), max(dz_max, dz)
+            for _leg, (thigh, flex, _stance, reached, y) in legs_out.items():
+                clamped += 0 if reached else 1
+                flex_min, flex_max = min(flex_min, flex), max(flex_max, flex)
+                if reached:
+                    max_err = max(max_err, abs(leg_foot(thigh, flex)[0] - y))
+            l_thigh, l_flex, l_stance, _r, _y = legs_out["l"]
+            fy = leg_foot(l_thigh, l_flex)[0]
+            if previous is not None and previous[1] and l_stance:
+                speeds.append(-(fy - previous[0]) / (self.cycle / n))
+            previous = (fy, l_stance)
+        avg = sum(speeds) / len(speeds) if speeds else 0.0
+        print(
+            "%s: Zyklus %.2f s, Kontakt %.2f s (%.0f %%), Standfuß %.2f m/s (Soll %.2f), Fußweg %.2f m, "
+            "Kniebeugung %.0f bis %.0f Grad, Hüfte %.1f bis %.1f cm, nicht erreicht: %d, FK-Abweichung %.4f m"
+            % (name, self.cycle, self.contact, 100 * self.stance, avg, self.speed * self.ratio,
+               2 * self.stride_half, flex_min, flex_max, dz_min * 100, dz_max * 100, clamped, max_err)
+        )
 
 
-def run_hips_dz(u):
-    """Hüfthöhe: in der Standphase eines Beins eingefedert, in der Flugphase leicht angehoben."""
-    s = RUN_STANCE
-    u_leg = u % 0.5 * 1.0  # beide Beine wechseln sich ab: Halbzyklus
-    half = 0.5
-    if u_leg < s:
-        return RUN_DZ_STAND - RUN_DZ_COMPRESS * math.sin(math.pi * u_leg / s)
-    flight = (u_leg - s) / (half - s)
-    return RUN_DZ_STAND + RUN_DZ_FLIGHT * math.sin(math.pi * flight)
+RUN = Gait(RUN_SPEED, RUN_FRAMES, RUN_CONTACT_SECONDS, RUN_GROUND_RATIO, RUN_LIFT, RUN_TANGENT,
+           RUN_DZ_STAND, RUN_DZ_COMPRESS, RUN_DZ_FLIGHT)
+SNEAK = Gait(SNEAK_SPEED, SNEAK_FRAMES, SNEAK_CONTACT_SECONDS, SNEAK_GROUND_RATIO, SNEAK_LIFT,
+             SNEAK_TANGENT, SNEAK_DZ_STAND, SNEAK_DZ_COMPRESS, SNEAK_DZ_BOB)
 
 
-def run_legs(u):
-    """Winkel beider Beine und Hüfthöhe: {l: (thigh, flex, im Stand?, erreicht?)}, dz."""
-    dz = run_hips_dz(u)
-    legs_out = {}
-    for name, offset in (("l", 0.0), ("r", 0.5)):
-        y, z, stance = run_foot((u + offset) % 1.0)
-        z_rel = z - (HIP_HEIGHT + dz)
-        thigh, flex, reached = leg_ik(y, z_rel)
-        legs_out[name] = (thigh, flex, stance, reached, y)
-    return legs_out, dz
-
-
-def run_pose(t):
-    p = 2 * math.pi * t
-    legs_out, dz = run_legs(t)
+def gait_pose(gait, t):
+    """Beine und Hüfte eines Zyklus an der Stelle t (0 bis 1)."""
+    legs_out, dz = gait.legs(t)
     pose = {}
     for name, (thigh, flex, stance, _reached, _y) in legs_out.items():
         pose[f"thigh_{name}"] = (thigh, 0, 0)
         pose[f"shin_{name}"] = (-flex, 0, 0)
         # Fuß flach im Stand, in der Schwungphase leicht nach unten gestreckt
-        foot = (flex - thigh) + (0.0 if stance else -18.0)
-        pose[f"foot_{name}"] = (foot, 0, 0)
+        pose[f"foot_{name}"] = ((flex - thigh) + (0.0 if stance else -18.0), 0, 0)
+    return pose, dz
+
+
+def run_pose(t):
+    p = 2 * math.pi * t
+    pose, dz = gait_pose(RUN, t)
     pose.update(hips_pose(dz, yaw=5 * math.sin(p), roll=2.5 * math.sin(p)))
     pose["spine"] = (-8, 0, -5 * math.sin(p))
     pose["chest"] = (-6, 0, -5 * math.sin(p))
     pose["head"] = (12, 0, 1.5 * math.sin(p))
     # Arme gegenläufig zu den Beinen: linker Arm hinten, wenn das linke Bein vorn aufsetzt
     for name, sign in (("l", -1.0), ("r", 1.0)):
-        swing = sign * 52 * math.cos(p)
-        pose[f"upper_arm_{name}"] = (swing + 4, 0, -7 if name == "l" else 7)
+        side = 10 if name == "l" else -10  # Abspreizen, damit die Fäuste den Körper nicht schneiden
+        pose[f"upper_arm_{name}"] = (sign * 52 * math.cos(p) + 4, side, 0)
         pose[f"forearm_{name}"] = (88 + 14 * sign * math.cos(p), 0, 0)
         pose[f"hand_{name}"] = (6, 0, 0)
-    # Schal: weht fast waagerecht nach hinten, Welle läuft zum Ende hin
     pose.update(
         scarf(
             -4 + 7 * math.sin(2 * p),
@@ -572,60 +625,20 @@ def run_pose(t):
     return pose
 
 
-def run_report():
-    """Prüfzahlen des Laufzyklus: Rutschen, Reichweite, Kniebeugung, Körperauf und -ab."""
-    n = 170
-    clamped = 0
-    flex_min, flex_max = 999.0, 0.0
-    dz_min, dz_max = 999.0, -999.0
-    max_err = 0.0
-    stance_speeds = []
-    previous = None
-    for i in range(n + 1):
-        u = i / n
-        legs_out, dz = run_legs(u)
-        dz_min, dz_max = min(dz_min, dz), max(dz_max, dz)
-        for name, (thigh, flex, stance, reached, y) in legs_out.items():
-            clamped += 0 if reached else 1
-            flex_min, flex_max = min(flex_min, flex), max(flex_max, flex)
-            fy, _fz = leg_foot(thigh, flex)
-            if reached:
-                max_err = max(max_err, abs(fy - y))
-        # Standfuß: Geschwindigkeit des Knöchels relativ zur Hüfte
-        l_thigh, l_flex, l_stance, _r, _y = legs_out["l"]
-        fy_now, _ = leg_foot(l_thigh, l_flex)
-        if previous is not None and previous[1] and l_stance:
-            stance_speeds.append(-(fy_now - previous[0]) / (RUN_CYCLE_SECONDS / n))
-        previous = (fy_now, l_stance)
-    avg = sum(stance_speeds) / len(stance_speeds) if stance_speeds else 0.0
-    print(
-        "Laufzyklus: Zyklus %.2f s, Kontakt %.2f s, Standfuß %.2f m/s (Soll %.2f = Tempo mal Verhältnis), "
-        "Kniebeugung %.0f bis %.0f Grad, Hüfte %.1f bis %.1f cm, nicht erreicht: %d, FK-Abweichung %.4f m"
-        % (RUN_CYCLE_SECONDS, RUN_CONTACT_SECONDS, avg, RUN_SPEED * RUN_GROUND_RATIO, flex_min, flex_max,
-           dz_min * 100, dz_max * 100, clamped, max_err)
-    )
-
-
 def sneak_pose(t):
+    """Geduckter Schleichgang: tiefe Hocke, Oberkörper vorgeneigt, Fäuste als Deckung."""
     p = 2 * math.pi * t
-    pose = {}
-    thighs, knees = {}, {}
-    for n, off in (("l", 0.0), ("r", math.pi)):
-        th = p + off
-        thighs[n] = 24 * math.sin(th) + 44
-        knees[n] = 62 + 24 * max(0.0, math.cos(th - 0.35))
-    legs_pose, dz = legs(thighs["l"], knees["l"], thighs["r"], knees["r"])
-    pose.update(legs_pose)
-    pose.update(hips_pose(dz, pitch=-4, yaw=4 * math.sin(p)))
-    pose["spine"] = (-20, 0, -3 * math.sin(p))
-    pose["chest"] = (-12, 0, -3 * math.sin(p))
-    pose["head"] = (24, 0, 0)
-    for n, off in (("l", math.pi), ("r", 0.0)):
-        th = p + off
-        pose[f"upper_arm_{n}"] = (-12 * math.sin(th) + 10, 0, -10 if n == "l" else 10)
-        pose[f"forearm_{n}"] = (62, 0, 0)
-        pose[f"hand_{n}"] = (5, 0, 0)
-    pose.update(scarf(-8 + 4 * math.sin(2 * p), -4 + 5 * math.sin(2 * p - 0.5), 0 + 6 * math.sin(2 * p - 1.0), 3 * math.sin(p)))
+    pose, dz = gait_pose(SNEAK, t)
+    pose.update(hips_pose(dz, pitch=-4, yaw=4 * math.sin(p), roll=2 * math.sin(p)))
+    pose["spine"] = (-18, 0, -3 * math.sin(p))
+    pose["chest"] = (-10, 0, -3 * math.sin(p))
+    pose["head"] = (20, 0, 2 * math.sin(p))
+    for name, sign in (("l", -1.0), ("r", 1.0)):
+        side = 20 if name == "l" else -20
+        pose[f"upper_arm_{name}"] = (32 + sign * 10 * math.cos(p), side, 0)
+        pose[f"forearm_{name}"] = (84 - sign * 6 * math.cos(p), 0, 0)
+        pose[f"hand_{name}"] = (6, 0, 0)
+    pose.update(scarf(-4 + 4 * math.sin(2 * p), -4 + 5 * math.sin(2 * p - 0.9), -3 + 6 * math.sin(2 * p - 1.8), 3 * math.sin(p)))
     return pose
 
 
@@ -663,8 +676,8 @@ def jump_pose(t):
     pose["chest"] = (-10 * (1 - s) + 4 * s, 0, 0)
     pose["head"] = (20 * (1 - s) - 6 * s, 0, 0)
     arm = 15 * (1 - s) + 115 * s
-    pose["upper_arm_l"] = (arm, 0, -12 * s)
-    pose["upper_arm_r"] = (arm, 0, 12 * s)
+    pose["upper_arm_l"] = (arm, 28 * s, 0)
+    pose["upper_arm_r"] = (arm, -28 * s, 0)
     pose["forearm_l"] = (40 - 20 * s, 0, 0)
     pose["forearm_r"] = (40 - 20 * s, 0, 0)
     pose.update(scarf(-10 + 14 * s, -4 + 10 * s, 0 + 8 * s))
@@ -680,8 +693,8 @@ def fall_pose(t):
     pose["spine"] = (2, 0, 0)
     pose["chest"] = (3 + 1.5 * math.sin(p), 0, 0)
     pose["head"] = (-4, 0, 0)
-    pose["upper_arm_l"] = (120 + 6 * math.sin(p), 0, -35)
-    pose["upper_arm_r"] = (112 + 6 * math.sin(p + 1), 0, 35)
+    pose["upper_arm_l"] = (120 + 6 * math.sin(p), 40, 0)
+    pose["upper_arm_r"] = (112 + 6 * math.sin(p + 1), -40, 0)
     pose["forearm_l"] = (22, 0, 0)
     pose["forearm_r"] = (26, 0, 0)
     pose.update(scarf(28 + 8 * math.sin(2 * p), 24 + 10 * math.sin(2 * p - 0.5), 20 + 12 * math.sin(2 * p - 1.0), 6 * math.sin(p)))
@@ -708,7 +721,7 @@ def land_pose(t):
 CLIPS = [
     ("idle-loop", 60, idle_pose, True),
     ("run-loop", RUN_FRAMES, run_pose, True),
-    ("sneak-loop", 36, sneak_pose, True),
+    ("sneak-loop", SNEAK_FRAMES, sneak_pose, True),
     ("sneak_idle-loop", 60, sneak_idle_pose, True),
     ("jump", 10, jump_pose, False),
     ("fall-loop", 24, fall_pose, True),
@@ -810,8 +823,8 @@ def make_previews(rig, actions, folder):
         render_pose(rig, cam, actions[name], frame, view, os.path.join(folder, f"{i:02d}_{name}_{frame}_{view}.png"))
 
 
-def make_run_strip(rig, actions, folder):
-    """Lauf mit echtem Tempo an Bodenmarken vorbei: zeigt Gleiten und Gesamteindruck."""
+def make_gait_strip(rig, actions, folder, clip, gait):
+    """Schrittzyklus mit echtem Tempo an Bodenmarken vorbei: zeigt Gleiten und Gesamteindruck."""
     os.makedirs(folder, exist_ok=True)
     cam = setup_render(520, 330)
     cam.data.ortho_scale = 3.4
@@ -819,14 +832,14 @@ def make_run_strip(rig, actions, folder):
     marks.use_nodes = True
     marks.node_tree.nodes["Principled BSDF"].inputs["Base Color"].default_value = (0.9, 0.2, 0.2, 1)
     for k in range(-14, 15):
-        mesh = bpy.data.meshes.new(f"marke{k}")
+        mesh = bpy.data.meshes.new(f"marke{clip}{k}")
         mb = bmesh.new()
         bmesh.ops.create_cube(mb, size=1.0)
         for v in mb.verts:
             v.co = Vector((v.co.x * 0.02, v.co.y * 0.03, v.co.z * 0.10 + 0.05))
         mb.to_mesh(mesh)
         mb.free()
-        obj = bpy.data.objects.new(f"marke{k}", mesh)
+        obj = bpy.data.objects.new(f"marke{clip}{k}", mesh)
         obj.location = (-0.55, k * 0.25, 0)
         if k % 4:
             obj.data.materials.append(marks)
@@ -836,13 +849,12 @@ def make_run_strip(rig, actions, folder):
             obj.hide_render = True
     cam.location = (6.0, 0.0, 0.55)
     cam.rotation_euler = [math.radians(a) for a in (90, 0, 90)]
-    action = actions["run-loop"]
-    rig.obj.animation_data.action = action
-    for i in range(RUN_FRAMES):
+    rig.obj.animation_data.action = actions[clip]
+    for i in range(gait.frames):
         t = i / FPS
-        rig.obj.location = (0.0, RUN_SPEED * (t - RUN_CYCLE_SECONDS / 2), 0.0)
+        rig.obj.location = (0.0, gait.speed * (t - gait.cycle / 2), 0.0)
         bpy.context.scene.frame_set(i)
-        bpy.context.scene.render.filepath = os.path.join(folder, f"strip_{i:02d}.png")
+        bpy.context.scene.render.filepath = os.path.join(folder, f"{clip}_{i:02d}.png")
         bpy.ops.render.render(write_still=True)
     rig.obj.location = (0.0, 0.0, 0.0)
 
@@ -890,10 +902,12 @@ def main():
     actions = build_actions(rig)
     bpy.ops.object.mode_set(mode="OBJECT")
 
-    run_report()
+    RUN.report("Laufen")
+    SNEAK.report("Schleichen")
     if preview:
         make_previews(rig, actions, preview)
-        make_run_strip(rig, actions, os.path.join(preview, "lauf"))
+        make_gait_strip(rig, actions, os.path.join(preview, "lauf"), "run-loop", RUN)
+        make_gait_strip(rig, actions, os.path.join(preview, "schleichen"), "sneak-loop", SNEAK)
     export_glb(out)
     tris = sum(len(p.vertices) - 2 for p in mesh_obj.data.polygons)
     print(f"Fertig: {out} – {len(mesh_obj.data.vertices)} Punkte, {tris} Dreiecke (Umriss-Mesh zusätzlich), {len(actions)} Animationen")

@@ -4,7 +4,10 @@
 - Anlass: Nutzer meldet nach Build 8, das Laufen sehe aus wie Rückwärtslaufen; sonst passe alles (Figur, Kampfhaltung, Kamera-Schwenk).
 - Ursache (aus dem Video und einer Laufvorschau mit Bodenmarken): zu kleine, zu schnelle Schritte bei zu wenig Fußhöhe, der Körper glitt über die Füße.
 - Neuer Zyklus: 0,40 s, Fußweg 0,50 m, Bodenkontakt 0,12 s, Fußhöhe 8 cm, 20 % Gleiten erlaubt, Kniebeugung bis 93 Grad. Neue Vorschau im Blender-Skript: Lauf mit echtem Tempo an Bodenmarken vorbei.
-- Nicht belegt: ob der Lauf am iPhone natürlich aussieht.
+- **Schleichen** auf denselben Schrittgenerator umgestellt: vorher bewegte sich der Standfuß nur mit 0,36 m/s bei 1,9 m/s Körpertempo (Gleiten); jetzt 1,61 m/s bei Soll 1,61, tiefe Hocke (Kniebeugung 29 bis 80 Grad), Zyklus 0,53 s.
+- Sprung und Fallen: Arme nach oben und außen statt vor dem Gesicht.
+- Neue Tests: Schleichtempo und Zyklusdauer von `sneak` im Blender-Skript gleich Spielwert und Modell.
+- Nicht belegt: ob Lauf und Schleichen am iPhone natürlich aussehen.
 
 
 ## 2026-11-24 – Kampfhaltung und Kamera-Schwenk im Stillstand (Branch `claude/cartoon-vorbereitung`)
