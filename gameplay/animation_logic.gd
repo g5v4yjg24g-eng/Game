@@ -9,6 +9,8 @@ const SNEAK_IDLE := &"sneak_idle"
 const JUMP := &"jump"
 const FALL := &"fall"
 const LAND := &"land"
+## Salto vorwärts: Knie angezogen (Clip dauert so lange wie [constant ControlsConfig.FLIP_SECONDS]).
+const FLIP := &"flip"
 
 ## Unter dieser Geschwindigkeit (m/s) gilt die Figur als stehend.
 const MOVING_SPEED := 0.3
@@ -25,16 +27,19 @@ const LAND_SECONDS := 0.3
 
 ## [param on_floor] steht die Figur, [param vertical_speed] Steig-/Fallgeschwindigkeit (m/s),
 ## [param speed] waagerechte Geschwindigkeit (m/s), [param air_time] Sekunden seit dem Verlassen
-## des Bodens, [param land_left] Restzeit der Landeanimation.
+## des Bodens, [param land_left] Restzeit der Landeanimation, [param flipping] Salto läuft.
 static func pick(
 	on_floor: bool,
 	vertical_speed: float,
 	speed: float,
 	sneaking: bool,
 	air_time: float,
-	land_left: float
+	land_left: float,
+	flipping: bool = false
 ) -> StringName:
 	if not on_floor:
+		if flipping:
+			return FLIP
 		if vertical_speed > 0.5 and air_time < JUMP_SECONDS:
 			return JUMP
 		if vertical_speed <= 0.5 and air_time < COYOTE_SECONDS:

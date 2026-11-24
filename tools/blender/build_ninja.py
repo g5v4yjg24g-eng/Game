@@ -688,6 +688,27 @@ def jump_pose(t):
     return pose
 
 
+def flip_pose(t):
+    """Salto vorwärts (Wunsch Nutzer 2026-11-24): Knie zur Brust gezogen, Hände an den Schienbeinen,
+    Rücken rund; vorn aus der Sprunghaltung hinein, hinten wieder geöffnet für die Landung."""
+    rise = smooth(min(1.0, t / 0.3))
+    fall = smooth(max(0.0, (t - 0.72) / 0.28))
+    k = rise * (1 - fall)
+    legs_pose, _ = legs(24 * (1 - k) + 92 * k, 40 * (1 - k) + 112 * k, 12 * (1 - k) + 86 * k, 24 * (1 - k) + 108 * k)
+    pose = dict(legs_pose)
+    pose.update(hips_pose(0.04 * (1 - k) + 0.0 * k, pitch=-10 * k))
+    pose["spine"] = (2 * (1 - k) - 28 * k, 0, 0)
+    pose["chest"] = (4 * (1 - k) - 18 * k, 0, 0)
+    pose["head"] = (-6 * (1 - k) + 24 * k, 0, 0)
+    arm = 115 * (1 - k) + 62 * k
+    pose["upper_arm_l"] = (arm, 28 * (1 - k) + 12 * k, 0)
+    pose["upper_arm_r"] = (arm, -28 * (1 - k) - 12 * k, 0)
+    pose["forearm_l"] = (20 * (1 - k) + 70 * k, 0, 0)
+    pose["forearm_r"] = (20 * (1 - k) + 70 * k, 0, 0)
+    pose.update(scarf(4 + 10 * k, 8 + 14 * k, 6 + 16 * k))
+    return pose
+
+
 def fall_pose(t):
     p = 2 * math.pi * t
     pose = {}
@@ -728,6 +749,7 @@ CLIPS = [
     ("sneak-loop", SNEAK_FRAMES, sneak_pose, True),
     ("sneak_idle-loop", 60, sneak_idle_pose, True),
     ("jump", 10, jump_pose, False),
+    ("flip", 15, flip_pose, False),
     ("fall-loop", 24, fall_pose, True),
     ("land", 9, land_pose, False),
 ]
@@ -820,6 +842,10 @@ def make_previews(rig, actions, folder):
         ("sneak_idle-loop", 0, "vorn"),
         ("jump", 0, "seite"),
         ("jump", 10, "seite"),
+        ("flip", 0, "seite"),
+        ("flip", 4, "seite"),
+        ("flip", 7, "seite"),
+        ("flip", 12, "seite"),
         ("fall-loop", 0, "seite"),
         ("land", 4, "seite"),
     ]

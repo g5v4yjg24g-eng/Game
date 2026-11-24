@@ -83,7 +83,7 @@ func _ready() -> void:
 		"Nach dem Laufen: wieder idle (%s)" % player.current_animation()
 	)
 
-	# Sprung: die Animationen jump, fall und land kommen der Reihe nach
+	# Sprung (mit Salto): die Animationen flip, fall und land kommen der Reihe nach
 	var ground_y := player.global_position.y
 	var seen: Array[StringName] = []
 	bus.jump_pressed.emit()
@@ -110,12 +110,12 @@ func _ready() -> void:
 		"Nach der Landung steht die Figur wieder aufrecht"
 	)
 	_check(
-		seen.has(&"jump") and seen.has(&"fall") and seen.has(&"land"),
-		"Sprung zeigt jump, fall und land: %s" % [seen]
+		seen.has(&"flip") and seen.has(&"fall") and seen.has(&"land"),
+		"Sprung zeigt flip, fall und land: %s" % [seen]
 	)
 	_check(
-		seen.find(&"jump") < seen.find(&"fall") and seen.find(&"fall") < seen.find(&"land"),
-		"Reihenfolge jump, fall, land"
+		seen.find(&"flip") < seen.find(&"fall") and seen.find(&"fall") < seen.find(&"land"),
+		"Reihenfolge flip, fall, land"
 	)
 
 	# Kamera: Wischen nach rechts dreht die Blickrichtung, Joystick hoch folgt ihr
