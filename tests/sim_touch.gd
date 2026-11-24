@@ -138,6 +138,24 @@ func _ready() -> void:
 	)
 	Settings.update({"sensitivity": 1.0})
 	menu.close()
+	# Speichern und Laden: Werte überstehen einen Neustart, kaputte Datei ergibt Standardwerte
+	Settings.update({"sensitivity": 1.4, "max_fps": 60, "cartoon": false})
+	Settings.data = SettingsData.new()
+	Settings.load_from_disk()
+	_check(
+		is_equal_approx(Settings.data.sensitivity, 1.4) and Settings.data.max_fps == 60,
+		"Einstellungen werden gespeichert und wieder geladen"
+	)
+	_check(Engine.max_fps == 60, "Bildrate wird angewendet")
+	var broken := FileAccess.open(Settings.path, FileAccess.WRITE)
+	broken.store_string("[spiel\nkaputt")
+	broken.close()
+	Settings.load_from_disk()
+	_check(
+		is_equal_approx(Settings.data.sensitivity, 1.0) and Settings.data.max_fps == 120,
+		"Kaputte Datei ergibt Standardwerte"
+	)
+	Settings.update({})
 	_check(not scene.get_tree().paused, "Menü schließen setzt das Spiel fort")
 	_check(_toon_count() == 0, "Nach dem Ausschalten kein Toon-Material mehr (%d)" % _toon_count())
 	_check(
