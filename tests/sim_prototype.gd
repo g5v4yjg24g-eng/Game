@@ -27,6 +27,10 @@ func _ready() -> void:
 	_check(player.is_on_floor(), "Figur steht auf dem Boden")
 	var rest := player.global_position
 	_check(rest.y > -0.1 and rest.y < 0.3, "Figur liegt auf Bodenhöhe (y=%.2f)" % rest.y)
+	_check(
+		player.current_animation() == &"idle",
+		"Stehen: Animation idle (%s)" % player.current_animation()
+	)
 
 	# Kameralage: hinter (+Z bei Blick nach -Z) und über der Figur, Abstand wie eingestellt
 	var offset := rig.camera_position() - player.global_position
@@ -48,12 +52,20 @@ func _ready() -> void:
 	_check(absf(moved.x - rest.x) < 0.5, "Joystick hoch: kaum seitliche Abweichung")
 	var speed := Vector2(player.velocity.x, player.velocity.z).length()
 	_check(absf(speed - ControlsConfig.RUN_SPEED) < 0.3, "Lauftempo erreicht (%.2f m/s)" % speed)
+	_check(
+		player.current_animation() == &"run",
+		"Laufen: Animation run (%s)" % player.current_animation()
+	)
 
 	# Schleichen verlangsamt
 	bus.sneak_changed.emit(true)
 	await _frames(40)
 	speed = Vector2(player.velocity.x, player.velocity.z).length()
 	_check(absf(speed - ControlsConfig.SNEAK_SPEED) < 0.3, "Schleichtempo (%.2f m/s)" % speed)
+	_check(
+		player.current_animation() == &"sneak",
+		"Schleichen: Animation sneak (%s)" % player.current_animation()
+	)
 	bus.sneak_changed.emit(false)
 
 	# Stehen bleiben
@@ -63,17 +75,32 @@ func _ready() -> void:
 		Vector2(player.velocity.x, player.velocity.z).length() < 0.1,
 		"Ohne Eingabe bleibt die Figur stehen"
 	)
+	_check(
+		player.current_animation() == &"idle",
+		"Nach dem Laufen: wieder idle (%s)" % player.current_animation()
+	)
 
-	# Sprung
+	# Sprung: die Animationen jump, fall und land kommen der Reihe nach
 	var ground_y := player.global_position.y
+	var seen: Array[StringName] = []
 	bus.jump_pressed.emit()
 	var peak := ground_y
-	for i in 40:
+	for i in 100:
 		await get_tree().physics_frame
 		peak = maxf(peak, player.global_position.y)
+		var name := player.current_animation()
+		if seen.is_empty() or seen[-1] != name:
+			seen.append(name)
 	_check(peak - ground_y > 0.8, "Sprung hebt die Figur an (%.2f m)" % (peak - ground_y))
-	await _frames(60)
 	_check(player.is_on_floor(), "Figur landet wieder")
+	_check(
+		seen.has(&"jump") and seen.has(&"fall") and seen.has(&"land"),
+		"Sprung zeigt jump, fall und land: %s" % [seen]
+	)
+	_check(
+		seen.find(&"jump") < seen.find(&"fall") and seen.find(&"fall") < seen.find(&"land"),
+		"Reihenfolge jump, fall, land"
+	)
 
 	# Kamera: Wischen nach rechts dreht die Blickrichtung, Joystick hoch folgt ihr
 	var yaw_before := rig.yaw_deg

@@ -9,6 +9,7 @@
 | Bundle-ID | Entschieden | `com.fangpunkt.game` |
 | Repository | Entschieden | Alles unter `g5v4yjg24g-eng/Game`; Angelkarte-Deutschland und fangpunkt_webside bleiben unberührt |
 | Story | Entschieden | Auftragsmörder: erst blinder Gehorsam, dann wachsendes Hinterfragen des Auftraggebers (2026-11-24) |
+| Spielfigur | Vorläufig (Vorschlag von Claude, Nutzer prüft im Test) | Eigenes stilisiertes Modell (etwa 7 000 Dreiecke, dunkelblauer Stoff, roter Schal und Gürtel, Schwert auf dem Rücken), per Skript in Blender erzeugt, ersetzt die Platzhalterfigur. Nur Version 1: Proportionen, Farben und Details sind änderbar. |
 | Touch-Steuerung | Entschieden (Nutzer 2026-11-24: „wie geplant“) | Schwebender Joystick links (Mitte dort, wo der Daumen aufsetzt), Kamera per Wischen in der rechten Hälfte |
 | Sprung- und Schleichknopf | Vorläufig | Knöpfe rechts unten; Schleichen ist ein Umschalter (Vorschlag von Claude) |
 | Kamera-Empfindlichkeit | Entschieden (Nutzer 2026-11-24) | Standardwert etwas höher (0,2 statt 0,16 Grad pro Pixel, nach dem Test am iPhone). Später stellt der Nutzer sie selbst per **Schieberegler in den Einstellungen** ein. |

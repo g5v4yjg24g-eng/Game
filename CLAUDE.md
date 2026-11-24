@@ -31,6 +31,7 @@ Spieltexte, Doku und Commit-Nachrichten **Deutsch**, Code-Bezeichner Englisch. S
 - Branches: `main` stabil, Arbeit auf `claude/…`- oder `feature/…`-Branches. Auf `main` nur mit ausdrücklicher Anweisung pushen. Keine Pull Requests ohne Aufforderung.
 - Wichtige Änderungen in `docs/CHANGELOG.md` eintragen, Abweichungen vom Plan im selben Commit in den Dokumenten nachziehen.
 - Große Binärdateien (Modelle, Texturen, Audio) unter `assets/` laufen über Git LFS.
+- Die Spielfigur (`assets/characters/ninja/ninja.glb`) nie von Hand ändern, sondern `tools/blender/build_ninja.py` anpassen und neu erzeugen (Anleitung dort). Neue Animationen in Skript und `gameplay/animation_logic.gd` eintragen.
 
 ## Befehle
 ```

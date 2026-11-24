@@ -1,6 +1,9 @@
 class_name Player
 extends CharacterBody3D
-## Spielfigur (Platzhalter aus Grundformen). Läuft relativ zur Kamera, springt und schleicht.
+## Spielfigur. Läuft relativ zur Kamera, springt und schleicht; das Modell stammt aus
+## `assets/characters/ninja` (erzeugt mit `tools/blender/build_ninja.py`).
+
+const MODEL_PATH := "res://assets/characters/ninja/ninja.glb"
 
 @export var camera_rig: CameraRig
 
@@ -9,6 +12,10 @@ var _sneaking := false
 var _jump_buffer := 0.0
 var _spawn := Vector3.ZERO
 var _model: Node3D
+var _animation: AnimationPlayer
+var _air_time := 0.0
+var _land_left := 0.0
+var _was_airborne := false
 
 
 func _ready() -> void:
@@ -43,6 +50,7 @@ func _physics_process(delta: float) -> void:
 		velocity.y -= ControlsConfig.GRAVITY * delta
 
 	move_and_slide()
+	_update_animation(delta, horizontal.length())
 
 	if horizontal.length() > 0.2:
 		var target_yaw := MovementMath.facing_yaw(horizontal)
@@ -56,68 +64,51 @@ func _physics_process(delta: float) -> void:
 
 func _on_sneak_changed(active: bool) -> void:
 	_sneaking = active
-	if _model != null:
-		_model.scale.y = 0.82 if active else 1.0
+
+
+## Name der laufenden Animation (für Tests).
+func current_animation() -> StringName:
+	return _animation.current_animation if _animation != null else &""
 
 
 func _build_collision() -> void:
 	var shape := CapsuleShape3D.new()
-	shape.radius = 0.35
-	shape.height = 1.7
+	shape.radius = 0.3
+	shape.height = 1.8
 	var body := CollisionShape3D.new()
 	body.shape = shape
-	body.position.y = 0.85
+	body.position.y = 0.9
 	add_child(body)
 
 
-## Platzhalterfigur: dunkler Körper mit Kapuze, rotem Schal und Schwert auf dem Rücken.
-## Blickrichtung ist -Z. Wird später durch ein richtiges Modell ersetzt.
 func _build_model() -> void:
 	_model = Node3D.new()
 	add_child(_model)
-	var cloth := _material(Color(0.07, 0.08, 0.11), 0.9)
-	var scarf := _material(Color(0.7, 0.12, 0.1), 0.8)
-	var skin := _material(Color(0.82, 0.68, 0.55), 0.7)
-	var steel := _material(Color(0.5, 0.52, 0.56), 0.4)
-
-	var torso := CapsuleMesh.new()
-	torso.radius = 0.3
-	torso.height = 1.4
-	_add_part(torso, cloth, Vector3(0, 0.8, 0), Vector3.ZERO)
-
-	var head := SphereMesh.new()
-	head.radius = 0.22
-	head.height = 0.44
-	_add_part(head, cloth, Vector3(0, 1.68, 0), Vector3.ZERO)
-
-	var eyes := BoxMesh.new()
-	eyes.size = Vector3(0.3, 0.07, 0.06)
-	_add_part(eyes, skin, Vector3(0, 1.7, -0.19), Vector3.ZERO)
-
-	var neck := BoxMesh.new()
-	neck.size = Vector3(0.5, 0.12, 0.5)
-	_add_part(neck, scarf, Vector3(0, 1.42, 0), Vector3.ZERO)
-
-	var tail := BoxMesh.new()
-	tail.size = Vector3(0.16, 0.08, 0.7)
-	_add_part(tail, scarf, Vector3(0.1, 1.38, 0.5), Vector3(-12, 0, 0))
-
-	var sword := BoxMesh.new()
-	sword.size = Vector3(0.06, 0.06, 1.0)
-	_add_part(sword, steel, Vector3(0.0, 1.0, 0.36), Vector3(0, 0, 35))
-
-
-func _add_part(mesh: Mesh, material: Material, pos: Vector3, rot_deg: Vector3) -> void:
-	var instance := MeshInstance3D.new()
-	instance.mesh = mesh
-	instance.material_override = material
-	instance.position = pos
-	instance.rotation_degrees = rot_deg
+	var packed := load(MODEL_PATH) as PackedScene
+	if packed == null:
+		push_warning("Spielfigur nicht gefunden: %s" % MODEL_PATH)
+		return
+	var instance := packed.instantiate()
 	_model.add_child(instance)
+	_animation = instance.find_child("AnimationPlayer", true, false) as AnimationPlayer
+	if _animation != null:
+		_animation.play(AnimationLogic.IDLE)
 
 
-func _material(color: Color, roughness: float) -> StandardMaterial3D:
-	var material := StandardMaterial3D.new()
-	material.albedo_color = color
-	material.roughness = roughness
-	return material
+func _update_animation(delta: float, speed: float) -> void:
+	var on_floor := is_on_floor()
+	if on_floor:
+		if _was_airborne and AnimationLogic.should_land(_air_time, speed):
+			_land_left = AnimationLogic.LAND_SECONDS
+		_was_airborne = false
+		_air_time = 0.0
+	else:
+		_was_airborne = true
+		_air_time += delta
+	if _animation == null:
+		return
+	var clip := AnimationLogic.pick(on_floor, velocity.y, speed, _sneaking, _air_time, _land_left)
+	_land_left = maxf(_land_left - delta, 0.0)
+	if _animation.current_animation != clip:
+		_animation.play(clip, 0.15)
+	_animation.speed_scale = AnimationLogic.playback_speed(clip, speed)
