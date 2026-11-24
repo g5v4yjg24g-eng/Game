@@ -35,6 +35,16 @@ jobs:
         run: ./godot --headless --path . --import
       - name: Tests
         run: ./godot --headless --path . --script res://tests/run_tests.gd
+      - name: Simulation Steuerung und Bewegung
+        run: |
+          ./godot --headless --path . res://tests/sim_prototype.tscn 2>&1 | tee sim1.log
+          if grep -E "SCRIPT ERROR|FEHLER" sim1.log; then exit 1; fi
+          grep -q "alles bestanden" sim1.log
+      - name: Simulation Touch-Oberfläche
+        run: |
+          ./godot --headless --path . res://tests/sim_touch.tscn 2>&1 | tee sim2.log
+          if grep -E "SCRIPT ERROR|FEHLER" sim2.log; then exit 1; fi
+          grep -q "alles bestanden" sim2.log
       - name: Hauptszene startet ohne Fehler
         run: |
           ./godot --headless --path . --quit-after 30 2>&1 | tee start.log

@@ -20,6 +20,12 @@ Spieltexte, Doku und Commit-Nachrichten **Deutsch**, Code-Bezeichner Englisch. S
 - Renderer **Mobile**. Nur Godot-Funktionen, die mit dem iOS-Export funktionieren. Safe Areas und Dynamic Island über `ui/safe_area.gd`.
 - Mobile-Budget beachten: stabile Bildrate, wenig Draw Calls, kleine Texturen (ASTC), Akku schonen.
 
+## Testen ohne Gerät
+- Reine Logik: `tests/test_*.gd` (läuft mit `--script`, kennt **keine Autoloads**, also nie `EventBus` oder Szenen laden).
+- Zusammenspiel: Simulationen als Szene (`tests/sim_*.tscn`), mit Autoloads. Headless hat das Fenster die Größe 0; Touch-Ereignisse deshalb direkt an `TouchControls._input` schicken, nicht über `Input.parse_input_event`.
+- Screenshots gehen nur mit Software-OpenGL unter `xvfb-run` und dem Compatibility-Renderer. Farben und Bildrate sind dort nicht aussagekräftig für das iPhone.
+- Spielgefühl, Bildrate und Safe Area prüft nur der Nutzer am Gerät.
+
 ## Arbeitsweise
 - Vor dem Abschluss: `gdformat --check`, `gdlint`, Import und Tests (siehe README). Ergebnisse ehrlich berichten.
 - Branches: `main` stabil, Arbeit auf `claude/…`- oder `feature/…`-Branches. Auf `main` nur mit ausdrücklicher Anweisung pushen. Keine Pull Requests ohne Aufforderung.
@@ -30,6 +36,8 @@ Spieltexte, Doku und Commit-Nachrichten **Deutsch**, Code-Bezeichner Englisch. S
 ```
 godot --headless --path . --import
 godot --headless --path . --script res://tests/run_tests.gd
+godot --headless --path . res://tests/sim_prototype.tscn
+godot --headless --path . res://tests/sim_touch.tscn
 gdformat --check core ui tests gameplay world data
 gdlint core ui tests gameplay world data
 ```
