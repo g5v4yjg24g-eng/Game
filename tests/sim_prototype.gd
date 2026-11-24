@@ -7,6 +7,9 @@ var _failed := 0
 
 
 func _ready() -> void:
+	# Testläufe dürfen die Einstellungen des Geräts nicht verändern
+	Settings.path = "user://settings_test.cfg"
+	Settings.data = SettingsData.new()
 	var scene: Node = load("res://scenes/prototype.tscn").instantiate()
 	add_child(scene)
 	var bus := EventBus

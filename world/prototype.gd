@@ -24,3 +24,6 @@ func _ready() -> void:
 	style.root = self
 	add_child(style)
 	add_child(DebugOverlay.new())
+	add_child(SettingsMenu.new())
+	# Gespeicherten Stil anwenden
+	style.set_enabled(Settings.data.cartoon)

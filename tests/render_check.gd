@@ -6,6 +6,9 @@ extends Node
 
 
 func _ready() -> void:
+	# Testläufe dürfen die Einstellungen des Geräts nicht verändern
+	Settings.path = "user://settings_test.cfg"
+	Settings.data = SettingsData.new()
 	var method := RenderingServer.get_current_rendering_method()
 	if method != "mobile":
 		printerr("FEHLER Renderer ist '%s', erwartet 'mobile'" % method)

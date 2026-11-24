@@ -13,6 +13,7 @@ config/icon="res://ios/icon_1024.png"
 [autoload]
 
 EventBus="*res://core/event_bus.gd"
+Settings="*res://core/settings.gd"
 
 [display]
 

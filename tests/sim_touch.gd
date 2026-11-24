@@ -11,6 +11,9 @@ var _scene: Node
 
 
 func _ready() -> void:
+	# Testläufe dürfen die Einstellungen des Geräts nicht verändern
+	Settings.path = "user://settings_test.cfg"
+	Settings.data = SettingsData.new()
 	_scene = load("res://scenes/prototype.tscn").instantiate()
 	var scene := _scene
 	add_child(scene)
@@ -98,24 +101,44 @@ func _ready() -> void:
 	)
 	_touch(0, start, false)
 
-	# Stil-Knopf: Cartoon an und wieder aus
-	var style_center := TouchLayout.button_center(TouchLayout.Zone.STYLE, size, none)
+	# Menü-Knopf öffnet die Einstellungen; Stil und Empfindlichkeit wirken sofort
+	var menu_center := TouchLayout.button_center(TouchLayout.Zone.MENU, size, none)
 	var style: CartoonStyle = null
+	var menu: SettingsMenu = null
 	for child in scene.get_children():
 		if child is CartoonStyle:
 			style = child
+		if child is SettingsMenu:
+			menu = child
 	_check(style != null and not style.enabled, "Cartoon-Stil ist zu Beginn aus")
 	_check(_toon_count() == 0, "Zu Beginn kein Toon-Material (%d)" % _toon_count())
-	_touch(4, style_center, true)
-	_touch(4, style_center, false)
+	_check(menu != null and not menu.visible, "Menü ist zu Beginn geschlossen")
+	_touch(4, menu_center, true)
+	_touch(4, menu_center, false)
+	await _frames(2)
+	_check(
+		menu.visible and scene.get_tree().paused, "Menü-Knopf öffnet das Menü und hält das Spiel an"
+	)
+	Settings.update({"cartoon": true})
 	await _frames(3)
-	_check(style.enabled, "Stil-Knopf schaltet den Cartoon-Stil ein")
+	_check(style.enabled, "Einstellung schaltet den Cartoon-Stil ein")
 	_check(_toon_count() > 50, "Toon-Material an Figur und Welt (%d Netze)" % _toon_count())
 	_check(_visible_outlines() > 50, "Umrisse sichtbar (%d)" % _visible_outlines())
-	_touch(4, style_center, true)
-	_touch(4, style_center, false)
+	Settings.update({"cartoon": false})
 	await _frames(3)
-	_check(not style.enabled, "Stil-Knopf schaltet den Cartoon-Stil wieder aus")
+	_check(not style.enabled, "Einstellung schaltet den Cartoon-Stil wieder aus")
+	Settings.update({"sensitivity": 2.0})
+	var rig_node: CameraRig = null
+	for child in scene.get_children():
+		if child is CameraRig:
+			rig_node = child
+	_check(
+		is_equal_approx(rig_node.look_sensitivity, ControlsConfig.LOOK_DEG_PER_PX * 2.0),
+		"Kamera übernimmt die Empfindlichkeit"
+	)
+	Settings.update({"sensitivity": 1.0})
+	menu.close()
+	_check(not scene.get_tree().paused, "Menü schließen setzt das Spiel fort")
 	_check(_toon_count() == 0, "Nach dem Ausschalten kein Toon-Material mehr (%d)" % _toon_count())
 	_check(
 		_visible_outlines() == 0,

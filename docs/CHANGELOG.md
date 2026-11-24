@@ -1,5 +1,10 @@
 # Changelog
 
+## Unveröffentlicht – Einstellungsmenü
+- Neues Menü (Knopf „Menü“ oben rechts, ersetzt den Stil-Testknopf): Kamera-Empfindlichkeit per Schieberegler (50–200 %), Bildrate 30/60/120, Cartoon-Stil. Das Spiel pausiert, solange das Menü offen ist.
+- Einstellungen liegen im Autoload `Settings` (`core/settings.gd`, Prüfung und Grenzen rein in `core/settings_data.gd`, Datei `user://settings.cfg`); Tests in `tests/test_settings_data.gd` und `sim_touch`.
+- Wirkung am Gerät (Regler, Bildrate, Menü-Bedienung) ist **[O]**, bis der Nutzer es prüft.
+
 ## 2026-11-24 – Laufzyklus nachgebessert (Branch `claude/lauf-schritte`)
 - Anlass: Nutzer meldet nach Build 8, das Laufen sehe aus wie Rückwärtslaufen; sonst passe alles (Figur, Kampfhaltung, Kamera-Schwenk).
 - Ursache (aus dem Video und einer Laufvorschau mit Bodenmarken): zu kleine, zu schnelle Schritte bei zu wenig Fußhöhe, der Körper glitt über die Füße.
