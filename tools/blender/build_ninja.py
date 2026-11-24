@@ -635,10 +635,13 @@ def sneak_pose(t):
     pose["chest"] = (-10, 0, -3 * math.sin(p))
     pose["head"] = (20, 0, 2 * math.sin(p))
     for name, sign in (("l", -1.0), ("r", 1.0)):
-        side = 20 if name == "l" else -20
-        pose[f"upper_arm_{name}"] = (32 + sign * 10 * math.cos(p), side, 0)
-        pose[f"forearm_{name}"] = (84 - sign * 6 * math.cos(p), 0, 0)
-        pose[f"hand_{name}"] = (6, 0, 0)
+        # Gehen (Wunsch Nutzer 2026-11-24): Arme locker hängend, gegenläufig zu den Beinen
+        # schwingen, Ellbogen nur leicht gebeugt (vorher dauerhaft stark angewinkelt)
+        side = 12 if name == "l" else -12
+        swing = sign * math.cos(p)
+        pose[f"upper_arm_{name}"] = (8 + 24 * swing, side, 0)
+        pose[f"forearm_{name}"] = (24 + 12 * max(0.0, -swing), 0, 0)
+        pose[f"hand_{name}"] = (4, 0, 0)
     pose.update(scarf(-4 + 4 * math.sin(2 * p), -4 + 5 * math.sin(2 * p - 0.9), -3 + 6 * math.sin(2 * p - 1.8), 3 * math.sin(p)))
     return pose
 
