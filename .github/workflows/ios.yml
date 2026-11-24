@@ -5,8 +5,8 @@
 #   APPLE_TEAM_ID, ASC_KEY_ID, ASC_ISSUER_ID, ASC_PRIVATE_KEY (Inhalt der .p8-Datei)
 # Signiert wird erst beim Export für den App Store über den API-Schlüssel (kein Zertifikat von Hand).
 #
-# STAND: noch nie auf GitHub gelaufen. Der Godot-Export zum Xcode-Projekt wurde mit Godot 4.5.1 unter Linux
-# geprüft; Archiv, Signieren und Upload mit Xcode sind ungeprüft (docs/IOS_BUILD.md).
+# STAND: Lauf 1 (2026-11-24): Export und Archiv liefen, der Upload scheiterte an der Apple-Anmeldung.
+# Der Schritt „Zugangsdaten bei Apple prüfen“ meldet die Ursache (docs/IOS_BUILD.md).
 name: iPhone-Build (TestFlight)
 
 on:
@@ -60,6 +60,8 @@ jobs:
         run: |
           mkdir -p "$RUNNER_TEMP/asc"
           printf '%s' "$ASC_PRIVATE_KEY" > "$RUNNER_TEMP/asc/AuthKey.p8"
+      - name: Zugangsdaten bei Apple prüfen
+        run: node ios/check-asc.mjs "$RUNNER_TEMP/asc/AuthKey.p8"
       - name: Godot und Export-Templates laden
         run: |
           base="https://github.com/godotengine/godot-builds/releases/download/${GODOT_VERSION}-stable"
