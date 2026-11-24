@@ -1,5 +1,13 @@
 # Changelog
 
+## 2026-11-24 – Kampfhaltung und Kamera-Schwenk im Stillstand (Branch `claude/cartoon-vorbereitung`)
+- Nutzer: Figur gefällt; Ruhepose soll die **Kampfhaltung** sein; nach 10 bis 15 Sekunden Stillstand soll die Kamera **um die Figur schwenken** wie in bekannten Spielen.
+- Neue `idle`-Animation im Blender-Skript: breiter, tiefer Stand (Beine gespreizt, Knie gebeugt), Fäuste vor Brust und Kinn, Ellbogen nach außen, leichtes Atmen und Schwanken, Stirnband-Enden wehen leicht.
+- Kamera-Schwenk: Regel als reine Logik (`gameplay/idle_camera.gd`, Wartezeit 12 s, 12 Grad/s, sanftes Anfahren, schnelles Abbrechen), eingebunden in `CameraRig`; `Player.is_at_rest()`; neues Signal `EventBus.activity` für jede Berührung.
+- Tests: 98 Logik-Tests (neu: Schwenk-Regel), Simulation prüft, dass die Kamera vor der Wartezeit stehen bleibt, danach schwenkt und bei Eingabe stoppt.
+- Nicht belegt: Wirkung und Gefühl am iPhone.
+
+
 ## 2026-11-24 – Figur nach Referenz umgebaut (Branch `claude/cartoon-vorbereitung`)
 - Anlass: Nutzer meldet, der Lauf sehe besser aus, aber die Knie gingen zu weit hoch, und schlägt vor, **zuerst die Figur wie angefordert neu zu bauen und dann die Animationen zu perfektionieren**.
 - Neue Figur im Blender-Skript (Chibi, 1,45 m): großer Kopf, Kapuze mit Maske, große Augen mit zornigen Brauen, rotes Stirnband mit Spitzen und flatternden Enden, rote Schulterpolster, Gürtelknoten, Wickelkragen, rote Knieschützer, Fäuste, Stiefel, Schwert. Skelett weiter 21 Knochen (Schal-Kette heißt jetzt `band_1` bis `band_3`).

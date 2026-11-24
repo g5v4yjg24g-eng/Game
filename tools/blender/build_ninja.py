@@ -413,23 +413,44 @@ def hips_pose(dz, pitch=0.0, yaw=0.0, roll=0.0, dy=0.0):
     return {"hips": ((pitch, roll, yaw), (0, dy, dz))}
 
 
+def legs_wide(thigh_l, knee_l, thigh_r, knee_r, spread):
+    """Breiter Stand: Beine nach außen gespreizt (Drehung um die Vorwärtsachse).
+
+    spread: Spreizwinkel der Oberschenkel in Grad. Der Unterschenkel dreht teilweise zurück, die
+    Füße bleiben flach. Hüfthöhe aus der Beinlänge, damit beide Füße am Boden bleiben.
+    """
+    outer = spread  # Oberschenkel
+    inner = -0.7 * spread  # Unterschenkel dreht zurück
+    foot_roll = -(outer + inner)  # Sohle bleibt waagerecht
+    drop = max(leg_drop(thigh_l, knee_l), leg_drop(thigh_r, knee_r)) * math.cos(math.radians(0.55 * spread))
+    dz = drop - LEG_STAND
+    pose = {}
+    for n, th, kn, sign in (("l", thigh_l, knee_l, 1.0), ("r", thigh_r, knee_r, -1.0)):
+        pose[f"thigh_{n}"] = (th, sign * outer, 0)
+        pose[f"shin_{n}"] = (-kn, sign * inner, 0)
+        pose[f"foot_{n}"] = ((kn - th), sign * foot_roll, 0)
+    return pose, dz
+
+
 def idle_pose(t):
+    """Ruhepose: Kampfhaltung wie in der Vorlage. Breiter, tiefer Stand, Fäuste vor der Brust."""
     p = 2 * math.pi * t
     breathe = math.sin(p)
-    pose = {}
-    legs_pose, dz = legs(3, 6, -3, 6)
-    pose.update(legs_pose)
-    pose.update(hips_pose(dz + 0.004 * breathe, roll=1.0 * math.sin(p)))
-    pose["spine"] = (-2 + 1.2 * breathe, 0, 0)
-    pose["chest"] = (-1 + 1.5 * breathe, 0, 1.5 * math.sin(p))
-    pose["head"] = (2 - 1.0 * breathe, 0, 3 * math.sin(p + 0.7))
-    pose["upper_arm_l"] = (4 + 1.5 * breathe, 0, -6)
-    pose["upper_arm_r"] = (-2 - 1.5 * breathe, 0, 6)
-    pose["forearm_l"] = (16 + 2 * breathe, 0, 0)
-    pose["forearm_r"] = (18 - 2 * breathe, 0, 0)
-    pose["hand_l"] = (4, 0, 0)
-    pose["hand_r"] = (4, 0, 0)
-    pose.update(scarf(2 + 2 * math.sin(p), 4 + 3 * math.sin(p - 0.6), 6 + 4 * math.sin(p - 1.2), 4 * math.sin(p)))
+    sway = math.sin(p + 0.8)
+    legs_pose, dz = legs_wide(36, 60, 32, 56, 24)
+    pose = dict(legs_pose)
+    pose.update(hips_pose(dz + 0.008 * breathe, pitch=-3, roll=1.5 * sway))
+    pose["spine"] = (-14 + 1.5 * breathe, 0, 2 * sway)
+    pose["chest"] = (-8 + 2.0 * breathe, 0, -2 * sway)
+    pose["head"] = (16 - 1.5 * breathe, 0, 3 * math.sin(p + 1.4))
+    # Fäuste vor Brust und Kinn, Ellbogen leicht nach außen
+    pose["upper_arm_l"] = (46 + 2.5 * breathe, 24, 0)
+    pose["upper_arm_r"] = (42 - 2.5 * breathe, -24, 0)
+    pose["forearm_l"] = (104 - 3 * breathe, 0, 0)
+    pose["forearm_r"] = (108 + 3 * breathe, 0, 0)
+    pose["hand_l"] = (8, 0, 0)
+    pose["hand_r"] = (8, 0, 0)
+    pose.update(scarf(-4 + 3 * math.sin(p), -7 + 4 * math.sin(p - 0.6), -9 + 5 * math.sin(p - 1.2), 4 * math.sin(p)))
     return pose
 
 

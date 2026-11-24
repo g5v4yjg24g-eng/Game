@@ -42,6 +42,7 @@ Nachtrag Phase 3b (Branch `claude/ninja-modell`):
 - [ ] Am iPhone gesehen und bewertet (Aussehen, Animationen, Bildrate mit Modell) – nur der Nutzer kann das prüfen
 
 - [x] Laufanimation überarbeitet (2026-11-24, siehe Changelog); am Gerät zu prüfen
+- [x] Ruhepose Kampfhaltung und Kamera-Schwenk im Stillstand (2026-11-24); am Gerät zu prüfen
 
 Bewusst noch nicht enthalten: Gehen (nur Laufen und Schleichen), Lock-on-Kamera, Kampf (Phase 4), Gesichts- und Stoffdetails, Texturen. Die Figur ist ein stilisiertes Modell aus glatten Grundformen, keine Charakterkunst in Studioqualität.
 

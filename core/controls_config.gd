@@ -24,6 +24,13 @@ const START_PITCH_DEG := -14.0
 const CAMERA_DISTANCE := 4.0
 const CAMERA_HEIGHT := 1.15
 const CAMERA_FOLLOW_SPEED := 12.0
+## Kamera-Schwenk im Stillstand (Wunsch Nutzer: nach 10 bis 15 Sekunden ohne Bewegung).
+const IDLE_CAMERA_DELAY := 12.0
+## Drehgeschwindigkeit um die Figur in Grad pro Sekunde (ein voller Kreis dauert 30 Sekunden).
+const IDLE_CAMERA_SPEED := 12.0
+## Sanftes Anfahren und schnelles Abbrechen bei der ersten Eingabe (Sekunden).
+const IDLE_CAMERA_RAMP_IN := 2.5
+const IDLE_CAMERA_RAMP_OUT := 0.35
 
 # Bewegung
 ## Entwurfstempo des Laufzyklus: gleich RUN_SPEED in tools/blender/build_ninja.py (Test prüft das).

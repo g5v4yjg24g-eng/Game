@@ -83,6 +83,7 @@ func _draw_button(zone: TouchLayout.Zone, text: String, on: bool) -> void:
 
 
 func _on_press(index: int, position: Vector2) -> void:
+	EventBus.activity.emit()
 	match TouchLayout.zone_at(position, get_viewport_rect().size, _insets):
 		TouchLayout.Zone.JOYSTICK:
 			if not _joystick.active:

@@ -11,6 +11,7 @@ var pitch_deg := ControlsConfig.START_PITCH_DEG
 
 var _arm: SpringArm3D
 var _camera: Camera3D
+var _idle := IdleCamera.new()
 
 
 func _ready() -> void:
@@ -29,12 +30,25 @@ func _ready() -> void:
 	_arm.add_child(_camera)
 	_camera.make_current()
 	EventBus.look_input.connect(_on_look_input)
+	# Jede Eingabe setzt den Stillstands-Schwenk zurück
+	EventBus.activity.connect(_idle.notify_activity)
+	EventBus.jump_pressed.connect(_idle.notify_activity)
+	EventBus.sneak_changed.connect(func(_on: bool) -> void: _idle.notify_activity())
+	EventBus.move_input.connect(
+		func(v: Vector2) -> void:
+			if v.length() > 0.01:
+				_idle.notify_activity()
+	)
 	_apply_rotation()
 
 
 func _process(delta: float) -> void:
 	if target == null:
 		return
+	var at_rest: bool = target.has_method("is_at_rest") and target.is_at_rest()
+	var orbit := _idle.update(delta, at_rest)
+	if orbit > 0.0:
+		yaw_deg = wrapf(yaw_deg + orbit * delta, -180.0, 180.0)
 	var goal := _target_position()
 	global_position = global_position.lerp(
 		goal, 1.0 - exp(-ControlsConfig.CAMERA_FOLLOW_SPEED * delta)
@@ -45,6 +59,11 @@ func _process(delta: float) -> void:
 ## Blickrichtung (Gier) im Bogenmaß, für die Bewegung relativ zur Kamera.
 func yaw_rad() -> float:
 	return deg_to_rad(yaw_deg)
+
+
+## Wie stark die Kamera gerade im Stillstand schwenkt (0 bis 1, für Tests).
+func idle_strength() -> float:
+	return _idle.strength
 
 
 ## Weltposition der Kamera (für Tests und Effekte).
