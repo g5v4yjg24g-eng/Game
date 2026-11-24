@@ -3,7 +3,7 @@
 Atmosphärisches Ninja-Action-Adventure für das iPhone, gebaut mit **Godot 4** (GDScript) als native iOS-App.
 Kein Web-Spiel, keine PWA.
 
-**Stand:** Phase 2 – technisches Grundgerüst. Noch kein Gameplay. Siehe [docs/ENTWICKLUNGSPLAN.md](docs/ENTWICKLUNGSPLAN.md).
+**Stand:** Phase 3 – spielbarer Prototyp (Testgelände, Platzhalterfigur, Touch-Steuerung), noch nicht am iPhone geprüft. Siehe [docs/ENTWICKLUNGSPLAN.md](docs/ENTWICKLUNGSPLAN.md).
 
 ## Dokumente
 - [Spielkonzept](docs/KONZEPT.md)
@@ -21,6 +21,8 @@ Kein Web-Spiel, keine PWA.
    gdformat --check core ui tests gameplay world data && gdlint core ui tests gameplay world data
    godot --headless --path . --import
    godot --headless --path . --script res://tests/run_tests.gd
+   godot --headless --path . res://tests/sim_prototype.tscn   # Bewegung und Kamera
+   godot --headless --path . res://tests/sim_touch.tscn       # Touch-Oberfläche
    ```
 4. Git LFS einrichten (`git lfs install`), bevor Assets unter `assets/` hinzukommen.
 
@@ -37,6 +39,13 @@ Kein Web-Spiel, keine PWA.
 | `scenes/` | Szenen |
 | `tests/` | Tests der Spiellogik |
 | `ios/` | Icon und Export-Einstellungen für iOS |
+
+## Steuerung (Touch)
+- **Links** irgendwo aufsetzen und ziehen: schwebender Joystick, die Figur läuft relativ zur Kamera.
+- **Rechte Hälfte** wischen: Kamera drehen und neigen.
+- **Knöpfe rechts unten:** Sprung, Schleichen (Umschalter).
+- Werte (Empfindlichkeit, Tempo, Totzone, Knopfgrößen) stehen gesammelt in `core/controls_config.gd`.
+- Am Mac/PC lässt sich mit der Maus testen (`emulate_touch_from_mouse`).
 
 ## Regeln
 Siehe [CLAUDE.md](CLAUDE.md).

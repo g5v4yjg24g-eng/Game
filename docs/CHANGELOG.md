@@ -1,5 +1,15 @@
 # Changelog
 
+## 2026-11-24 – Phase 3 (Prototyp), Branch `claude/phase-3-prototyp`
+- Spielbarer Prototyp: Testwelt aus Code, Platzhalterfigur, Kamera mit Hinderniserkennung, Bewegung relativ zur Kamera, Sprung, Schleichen.
+- Touch-Steuerung: schwebender Joystick (links), Kamera per Wischen (rechts), Knöpfe Sprung und Schleichen, Safe Area, Mehrfingerbedienung, Zurücksetzen beim Wechsel in den Hintergrund.
+- Messanzeige oben links (fps, Bildzeit, Draw Calls, Objekte) für Tests am Gerät.
+- Bildrate auf 60 fps begrenzt, Physik-Interpolation für ruhige Bewegung bei hoher Bildwiederholrate.
+- 45 Logik-Tests und zwei Simulationen (Bewegung, Touch) lokal grün; beide Simulationen laufen in der CI.
+- Erste Übersetzungsdatei `locale/de.po` für die Knopfbeschriftungen.
+- Messwerte am iPhone 16 Pro Max (Build 5): konstant 60 fps, 130 Draw Calls, 206 Objekte.
+- Am iPhone getestet (Build 5): Steuerung in Ordnung, Kamera auf Wunsch etwas schneller (0,2 Grad pro Pixel). Die Empfindlichkeit steckt jetzt im Kamera-Rig, damit später ein Schieberegler in den Einstellungen sie setzen kann.
+
 ## 2026-11-24 – Erster erfolgreicher iPhone-Build
 - Lauf 4 des Workflows „iPhone-Build (TestFlight)“ auf `main`: alle Schritte grün (Zugangsdaten-Prüfung, Godot-Export, Archiv, Signieren und Upload).
 - Ursache der früheren Fehler: nicht zusammenpassende App-Store-Connect-Zugangsdaten (Secrets neu gesetzt).

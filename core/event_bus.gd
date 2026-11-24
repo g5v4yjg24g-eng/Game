@@ -8,3 +8,12 @@ signal player_damaged(amount: int, source: Node)
 signal player_spotted(by: Node)
 ## Der Spielstand soll gesichert werden.
 signal save_requested
+
+## Joystick-Eingabe (x rechts, y nach unten, Länge 0 bis 1).
+signal move_input(vector: Vector2)
+## Wischbewegung für die Kamera in Pixeln der Oberfläche.
+signal look_input(drag: Vector2)
+## Sprungknopf wurde gedrückt.
+signal jump_pressed
+## Schleichen wurde ein- oder ausgeschaltet.
+signal sneak_changed(active: bool)

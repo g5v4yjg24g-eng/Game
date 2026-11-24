@@ -32,5 +32,9 @@ Zugangsdaten stehen nie im Repo. Im Preset steht nur der Platzhalter `TEAM_ID`; 
 - **[O] Noch offen:** Leistungsmessung mit echten Inhalten (ab Phase 3), Verhalten auf älteren iPhones.
 - **Testgerät:** iPhone 16 Pro Max mit iOS 27.2.1. **[O] Mindest-iOS 15.0** ist vorläufig.
 
+## Bekannte kleine Punkte
+- Der Export nimmt die Skripte aus `tests/` trotz `exclude_filter` mit ins Spielpaket (nur die Skriptdateien, die Test-Szenen nicht; Paket insgesamt etwa 44 KB). Ohne Folgen für das Spiel, soll vor dem App-Store-Release sauber ausgeschlossen werden.
+- Der Export unter Linux mit Godot 4.5.1 wurde für den Prototyp (Phase 3) lokal wiederholt und erzeugt das Xcode-Projekt ohne Fehler. Ein Lauf des iPhone-Workflows mit dem Prototyp steht noch aus.
+
 ## Release-Checkliste (später)
 Datenschutzangaben, Altersfreigabe, Screenshots, Beschreibung, Exportcompliance (`ITSAppUsesNonExemptEncryption` steht auf `false`) – siehe Phase 9.

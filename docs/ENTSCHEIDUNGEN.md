@@ -9,6 +9,10 @@
 | Bundle-ID | Entschieden | `com.fangpunkt.game` |
 | Repository | Entschieden | Alles unter `g5v4yjg24g-eng/Game`; Angelkarte-Deutschland und fangpunkt_webside bleiben unberührt |
 | Story | Entschieden | Auftragsmörder: erst blinder Gehorsam, dann wachsendes Hinterfragen des Auftraggebers (2026-11-24) |
+| Touch-Steuerung | Entschieden (Nutzer 2026-11-24: „wie geplant“) | Schwebender Joystick links (Mitte dort, wo der Daumen aufsetzt), Kamera per Wischen in der rechten Hälfte |
+| Sprung- und Schleichknopf | Vorläufig | Knöpfe rechts unten; Schleichen ist ein Umschalter (Vorschlag von Claude) |
+| Kamera-Empfindlichkeit | Entschieden (Nutzer 2026-11-24) | Standardwert etwas höher (0,2 statt 0,16 Grad pro Pixel, nach dem Test am iPhone). Später stellt der Nutzer sie selbst per **Schieberegler in den Einstellungen** ein. |
+| Bildrate | Vorläufig | Deckel 60 fps (`run/max_fps`), stabile Bildzeit und Akku vor 120 fps; später einstellbar (30/60) |
 | Arbeitstitel | Vorläufig | „Kagero“ |
 | Umfang Start | Vorläufig | Vertical Slice (Dorf, Wald, Festung) |
 | Kamera | Vorläufig | Geführte Third-Person mit Lock-on |

@@ -5,7 +5,8 @@ config_version=5
 
 config/name="Kagero"
 config/description="Ninja-Action-Adventure für das iPhone (Arbeitstitel)"
-run/main_scene="res://scenes/main.tscn"
+run/main_scene="res://scenes/prototype.tscn"
+run/max_fps=60
 config/features=PackedStringArray("4.5", "Mobile")
 config/icon="res://ios/icon_1024.png"
 
@@ -20,13 +21,23 @@ window/size/viewport_height=590
 window/stretch/mode="canvas_items"
 window/stretch/aspect="expand"
 window/handheld/orientation=4
+window/ios/hide_home_indicator=true
 
 [internationalization]
 
 locale/fallback="de"
+locale/translations=PackedStringArray("res://locale/de.po")
 
 [rendering]
 
 renderer/rendering_method="mobile"
 renderer/rendering_method.mobile="mobile"
 textures/vram_compression/import_etc2_astc=true
+
+[input_devices]
+
+pointing/emulate_touch_from_mouse=true
+
+[physics]
+
+common/physics_interpolation=true
