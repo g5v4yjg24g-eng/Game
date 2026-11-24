@@ -1,0 +1,41 @@
+# Automatische Prüfung bei jedem Push und Pull Request (Linux, ohne Apple-Zugang).
+name: Prüfung
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+env:
+  GODOT_VERSION: 4.5.1
+
+jobs:
+  pruefen:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          lfs: true
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: GDScript-Werkzeuge
+        run: pip install "gdtoolkit==4.*"
+      - name: Format und Stil
+        run: |
+          gdformat --check core ui tests gameplay world data
+          gdlint core ui tests gameplay world data
+      - name: Godot laden
+        run: |
+          curl -fsSL -o godot.zip "https://github.com/godotengine/godot-builds/releases/download/${GODOT_VERSION}-stable/Godot_v${GODOT_VERSION}-stable_linux.x86_64.zip"
+          unzip -q godot.zip
+          mv Godot_v${GODOT_VERSION}-stable_linux.x86_64 godot && chmod +x godot
+      - name: Projekt importieren
+        run: ./godot --headless --path . --import
+      - name: Tests
+        run: ./godot --headless --path . --script res://tests/run_tests.gd
+      - name: Hauptszene startet ohne Fehler
+        run: |
+          ./godot --headless --path . --quit-after 30 2>&1 | tee start.log
+          if grep -E "SCRIPT ERROR|ERROR:" start.log; then exit 1; fi
