@@ -9,5 +9,20 @@ msgstr "Sprung"
 msgid "HUD_SNEAK"
 msgstr "Schleichen"
 
-msgid "HUD_STYLE"
-msgstr "Stil"
+msgid "HUD_MENU"
+msgstr "Menü"
+
+msgid "MENU_TITLE"
+msgstr "Einstellungen"
+
+msgid "MENU_SENSITIVITY"
+msgstr "Kamera-Empfindlichkeit"
+
+msgid "MENU_FPS"
+msgstr "Bildrate"
+
+msgid "MENU_CARTOON"
+msgstr "Cartoon-Stil"
+
+msgid "MENU_CLOSE"
+msgstr "Zurück zum Spiel"

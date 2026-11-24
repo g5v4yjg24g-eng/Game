@@ -83,6 +83,17 @@ func run(t: Object) -> void:
 			"Entwurfstempo im Blender-Skript (%s) = RUN_SPEED im Spiel" % found.get_string(1)
 		)
 
+	var sneak_found := RegEx.create_from_string("(?m)^SNEAK_SPEED = ([0-9.]+)").search(script_text)
+	t.check(sneak_found != null, "Blender-Skript nennt das Entwurfstempo SNEAK_SPEED")
+	if sneak_found != null:
+		t.check(
+			is_equal_approx(sneak_found.get_string(1).to_float(), ControlsConfig.SNEAK_SPEED),
+			(
+				"Schleichtempo im Blender-Skript (%s) = SNEAK_SPEED im Spiel"
+				% sneak_found.get_string(1)
+			)
+		)
+
 	# Importierte Animationen: Namen, Wiederholung und Länge des Laufzyklus
 	var model := (load("res://assets/characters/ninja/ninja.glb") as PackedScene).instantiate()
 	var player := model.find_child("AnimationPlayer", true, false) as AnimationPlayer
@@ -103,5 +114,17 @@ func run(t: Object) -> void:
 					% [run_clip.length, expected]
 				)
 			)
+		var sneak_frames := RegEx.create_from_string("(?m)^SNEAK_FRAMES = ([0-9]+)").search(
+			script_text
+		)
+		t.check(sneak_frames != null, "Blender-Skript nennt SNEAK_FRAMES")
+		if sneak_frames != null:
+			var sneak_expected := sneak_frames.get_string(1).to_float() / 30.0
+			var sneak_clip := player.get_animation(&"sneak")
+			t.check(
+				absf(sneak_clip.length - sneak_expected) < 0.01,
+				"sneak dauert SNEAK_FRAMES Bilder (%.3f s)" % sneak_clip.length
+			)
+			t.check(sneak_clip.loop_mode == Animation.LOOP_LINEAR, "sneak wiederholt sich")
 		t.check(player.get_animation(&"jump").loop_mode == Animation.LOOP_NONE, "jump läuft einmal")
 	model.free()

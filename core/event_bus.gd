@@ -18,8 +18,11 @@ signal jump_pressed
 ## Schleichen wurde ein- oder ausgeschaltet.
 signal sneak_changed(active: bool)
 
-## Cartoon-Darstellung wurde ein- oder ausgeschaltet (Vorbereitung Phase 3c, Testknopf).
+## Cartoon-Darstellung wurde ein- oder ausgeschaltet (über die Einstellungen).
 signal style_changed(cartoon: bool)
+
+## Der Menü-Knopf wurde gedrückt (öffnet die Einstellungen).
+signal menu_requested
 
 ## Irgendeine Berührung des Bildschirms (setzt z. B. den Stillstands-Schwenk der Kamera zurück).
 signal activity

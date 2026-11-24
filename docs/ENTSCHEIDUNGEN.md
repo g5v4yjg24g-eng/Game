@@ -57,3 +57,9 @@ Die neue Figur ist 1,45 m statt 1,85 m groß (Kopf breiter als die Schultern, ku
 - Kollisionsform der Figur 1,8 → **1,45 m** hoch
 - **Unverändert:** Sprungstärke (Sprung 1,1 m hoch, im Chibi-Stil bewusst hoch), Beschleunigung, Drehgeschwindigkeit
 - Laufanimation nach Rückmeldung des Nutzers („Knie gehen zu weit hoch, wie eine Sportübung“): Kniebeugung von bis zu 109 auf **bis zu 73 Grad** gesenkt.
+
+## Laufzyklus (Nachbesserung nach Build 8, 2026-11-24)
+Rückmeldung des Nutzers: „Jetzt sieht das Laufen so aus, als würde ich rückwärts laufen. Ansonsten passt alles.“
+- Befund: Der Zyklus aus Build 8 hatte winzige Schritte (Fußweg 0,36 m, Bodenkontakt 0,07 s, beide Füße etwa 74 % der Zeit in der Luft, Fußhöhe 5 cm) bei 5,2 m/s und 0,51 m langen Beinen: Der Körper glitt über die Füße hinweg (Trippeln), was sich wie Rückwärtslaufen lesen kann. Die Fußhöhe hatte ich nach dem Hinweis „Knie zu hoch“ (Fußhöhe 26 cm, wie bei einer Fersen-zum-Po-Übung) zu weit abgesenkt.
+- Jetzt: Zyklus 0,40 s (5 Schritte je Sekunde), Fußweg 0,50 m, Bodenkontakt 0,12 s, Fußhöhe 8 cm, etwa 20 % Gleiten erlaubt (Standfuß mit 80 % des Körpertempos, bei Cartoon-Figuren üblich). Kniebeugung bis 93 Grad.
+- Das Gleiten und die Fußhöhe sind Geschmackswerte und stehen als Konstanten im Blender-Skript (`RUN_GROUND_RATIO`, `RUN_LIFT`).

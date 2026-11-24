@@ -13,6 +13,7 @@ Danach in Godot importieren (`godot --headless --path . --import`) und Tests lau
 
 ## Konventionen
 - Maße in Metern, Füße bei z = 0, Körpergröße etwa 1,45 m (Chibi). Blickrichtung im Blender-Raum +Y (wird im glTF zu -Z, wie Godot es erwartet).
+- **Laufen und Schleichen** werden mit einem gemeinsamen Schrittgenerator (`Gait`) berechnet; `RUN_SPEED` und `SNEAK_SPEED` im Skript müssen den Werten in `core/controls_config.gd` entsprechen (ein Test prüft das), sonst rutschen die Füße. Mit Vorschau-Ordner entstehen auch Läufe mit echtem Tempo an Bodenmarken vorbei (Unterordner `lauf` und `schleichen`).
 - Animationsnamen mit Endung `-loop` wiederholt Godot beim Import (ohne Endung: einmalig). Die Endung verschwindet beim Import: im Spiel heißen die Clips `idle`, `run`, `sneak`, `sneak_idle`, `jump`, `fall`, `land`.
 - Die Namen stehen in `gameplay/animation_logic.gd`; neue Clips dort und im Skript (`CLIPS`) ergänzen.
 - Die `.glb` liegt in Git LFS (`assets/**/*.glb`).
