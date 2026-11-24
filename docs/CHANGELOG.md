@@ -1,5 +1,12 @@
 # Changelog
 
+## Unveröffentlicht – Fehler in Build 10: mitlaufende Ebene
+- **Salto mit angezogenen Knien** (Wunsch Nutzer 2026-11-24): neuer Clip `flip` (Knie zur Brust, runder Rücken, Hände an den Schienbeinen, am Ende wieder geöffnet), läuft genau so lange wie der Salto-Winkel (0,5 s) und ersetzt `jump` beim Absprung. Logik `AnimationLogic.pick(…, flipping)`, Tests und Simulation angepasst. Wirkung am Gerät **[O]**; Stärke des Anziehens bei Bedarf nachstellen (`flip_pose` im Blender-Skript).
+- Fehler: Im Spiel lief unter der Figur eine helle Fläche samt gestrichelter Linie mit. Ursache: Das Blender-Skript exportierte mit angegebenem Vorschau-Ordner die ganze Szene, also auch Vorschau-Boden (6 × 6 m) und Bodenmarken. Betraf die `ninja.glb` seit den Lauf-Vorschauen (Commit `68882cb`), im Cartoon-Stil besonders sichtbar.
+- Behoben: `export_glb` exportiert nur Skelett, Figur und Umriss (`use_selection`). Neuer Test `tests/test_ninja_model.gd` (nur zwei Netze, kein Boden/Marke/Licht/Kamera, Figur kleiner 2,5 m); er schlägt mit der alten Datei an.
+- Nebenwirkung: Draw Calls im Software-Renderer 315 → 152, Objekte 416 → 253.
+
+
 ## Unveröffentlicht – Ninja-Lauf (Branch `claude/ninja-lauf`)
 - Wunsch Nutzer (Vorlage als Bild): beim Rennen Oberkörper stark nach vorn geneigt, beide Arme nach hinten gestreckt. Umgesetzt in `run_pose` (Wirbelsäule −30°, Brust −16°, Kopf +36° gegen die Neigung, Oberarme −78°, Unterarme fast gestreckt, nur leichter Armschwung). Beinzyklus unverändert.
 - Gehen (Schleichen): Arme hängen locker und schwingen gegenläufig zu den Beinen, Ellbogen nur leicht gebeugt (vorher dauerhaft 84° angewinkelt). Wirkung am Gerät **[O]**.

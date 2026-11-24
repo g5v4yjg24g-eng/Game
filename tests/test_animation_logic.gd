@@ -25,6 +25,14 @@ func run(t: Object) -> void:
 	)
 
 	t.check(
+		AnimationLogic.pick(false, 7.0, 0, false, 0.05, 0, true) == AnimationLogic.FLIP,
+		"Salto läuft: flip"
+	)
+	t.check(
+		AnimationLogic.pick(true, 0.0, 0, false, 0.0, 0, true) == AnimationLogic.IDLE,
+		"Salto am Boden zeigt keinen flip"
+	)
+	t.check(
 		AnimationLogic.pick(false, 7.0, 0, false, 0.05, 0) == AnimationLogic.JUMP, "Absprung: jump"
 	)
 	t.check(
@@ -99,7 +107,7 @@ func run(t: Object) -> void:
 	var player := model.find_child("AnimationPlayer", true, false) as AnimationPlayer
 	t.check(player != null, "Modell enthält einen AnimationPlayer")
 	if player != null:
-		for clip in [&"idle", &"run", &"sneak", &"sneak_idle", &"jump", &"fall", &"land"]:
+		for clip in [&"idle", &"run", &"sneak", &"sneak_idle", &"jump", &"flip", &"fall", &"land"]:
 			t.check(player.has_animation(clip), "Animation '%s' ist im Modell" % clip)
 		var run_clip := player.get_animation(&"run")
 		t.check(run_clip.loop_mode == Animation.LOOP_LINEAR, "run wiederholt sich")
@@ -127,4 +135,9 @@ func run(t: Object) -> void:
 			)
 			t.check(sneak_clip.loop_mode == Animation.LOOP_LINEAR, "sneak wiederholt sich")
 		t.check(player.get_animation(&"jump").loop_mode == Animation.LOOP_NONE, "jump läuft einmal")
+		t.check(player.get_animation(&"flip").loop_mode == Animation.LOOP_NONE, "flip läuft einmal")
+		t.check(
+			absf(player.get_animation(&"flip").length - ControlsConfig.FLIP_SECONDS) < 0.1,
+			"flip dauert etwa so lang wie der Salto"
+		)
 	model.free()

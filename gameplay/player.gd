@@ -144,8 +144,13 @@ func _update_animation(delta: float, speed: float) -> void:
 		_air_time += delta
 	if _animation == null:
 		return
-	var clip := AnimationLogic.pick(on_floor, velocity.y, speed, _sneaking, _air_time, _land_left)
+	var clip := AnimationLogic.pick(
+		on_floor, velocity.y, speed, _sneaking, _air_time, _land_left, _flip.active
+	)
 	_land_left = maxf(_land_left - delta, 0.0)
 	if _animation.current_animation != clip:
 		_animation.play(clip, 0.15)
 	_animation.speed_scale = AnimationLogic.playback_speed(clip, speed)
+	if clip == AnimationLogic.FLIP:
+		# Clip über genau die Dauer des Salto-Winkels spielen
+		_animation.speed_scale = _animation.get_animation(clip).length / ControlsConfig.FLIP_SECONDS
