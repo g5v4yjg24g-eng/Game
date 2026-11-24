@@ -605,15 +605,16 @@ def run_pose(t):
     p = 2 * math.pi * t
     pose, dz = gait_pose(RUN, t)
     pose.update(hips_pose(dz, yaw=5 * math.sin(p), roll=2.5 * math.sin(p)))
-    pose["spine"] = (-8, 0, -5 * math.sin(p))
-    pose["chest"] = (-6, 0, -5 * math.sin(p))
-    pose["head"] = (12, 0, 1.5 * math.sin(p))
-    # Arme gegenläufig zu den Beinen: linker Arm hinten, wenn das linke Bein vorn aufsetzt
+    # Ninja-Lauf (Wunsch Nutzer 2026-11-24, Vorlage als Bild): Oberkörper stark nach vorn geneigt,
+    # Kopf hebt sich dagegen, beide Arme nach hinten gestreckt (kaum Armschwung).
+    pose["spine"] = (-30, 0, -3 * math.sin(p))
+    pose["chest"] = (-16, 0, -3 * math.sin(p))
+    pose["head"] = (36, 0, 1.0 * math.sin(p))
     for name, sign in (("l", -1.0), ("r", 1.0)):
-        side = 10 if name == "l" else -10  # Abspreizen, damit die Fäuste den Körper nicht schneiden
-        pose[f"upper_arm_{name}"] = (sign * 52 * math.cos(p) + 4, side, 0)
-        pose[f"forearm_{name}"] = (88 + 14 * sign * math.cos(p), 0, 0)
-        pose[f"hand_{name}"] = (6, 0, 0)
+        side = 8 if name == "l" else -8  # leicht abspreizen, damit die Arme den Körper nicht schneiden
+        pose[f"upper_arm_{name}"] = (-78 + sign * 7 * math.cos(p), side, 0)
+        pose[f"forearm_{name}"] = (14 + 4 * sign * math.cos(p), 0, 0)
+        pose[f"hand_{name}"] = (0, 0, 0)
     pose.update(
         scarf(
             -4 + 7 * math.sin(2 * p),

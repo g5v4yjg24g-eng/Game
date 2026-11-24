@@ -1,5 +1,9 @@
 # Changelog
 
+## Unveröffentlicht – Ninja-Lauf (Branch `claude/ninja-lauf`)
+- Wunsch Nutzer (Vorlage als Bild): beim Rennen Oberkörper stark nach vorn geneigt, beide Arme nach hinten gestreckt. Umgesetzt in `run_pose` (Wirbelsäule −30°, Brust −16°, Kopf +36° gegen die Neigung, Oberarme −78°, Unterarme fast gestreckt, nur leichter Armschwung). Beinzyklus unverändert.
+- Aussehen am Gerät **[O]**; ob die Neigung noch stärker oder schwächer sein soll, entscheidet der Nutzer.
+
 ## Unveröffentlicht – Einstellungsmenü
 - Neues Menü (Knopf „Menü“ oben rechts, ersetzt den Stil-Testknopf): Kamera-Empfindlichkeit per Schieberegler (50–200 %), Bildrate 30/60/120, Cartoon-Stil. Das Spiel pausiert, solange das Menü offen ist.
 - Einstellungen liegen im Autoload `Settings` (`core/settings.gd`, Prüfung und Grenzen rein in `core/settings_data.gd`, Datei `user://settings.cfg`); Tests in `tests/test_settings_data.gd` und `sim_touch`.
