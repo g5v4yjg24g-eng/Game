@@ -42,7 +42,7 @@ Nicht Teil von Phase 3: richtiges Ninja-Modell und Animationen (Platzhalter), Lo
 |---|---|---|---|---|---|
 | 2026-11-24 | Prototyp, Build 5 (60-fps-Deckel) | iPhone 16 Pro Max, iOS 27.2.1 | konstant 60 | 130 | 206 |
 
-Hinweis: Wegen des 60-fps-Deckels sagt „konstant 60“ nur, dass das Ziel erreicht ist, nicht wie viel Reserve bleibt. Für die Reserve und für ältere iPhones braucht es später einen Test ohne Deckel oder mit GPU-Zeit (Debug-Schalter, geplant). Die Draw Calls (130) liegen deutlich unter den 158 des Software-Screenshots am PC, weil der Mobile-Renderer anders zusammenfasst; die Bäume lassen sich später mit MultiMesh noch bündeln.
+Hinweis: Wegen des 60-fps-Deckels sagt „konstant 60“ nur, dass das Ziel erreicht ist, nicht wie viel Reserve bleibt. Für die Reserve und für ältere iPhones braucht es später einen Test ohne Deckel oder mit GPU-Zeit (Debug-Schalter, geplant). Die Draw Calls (130) weichen von den 158 im Software-Screenshot am PC ab (anderer Renderer, anderer Blickwinkel); die Ursache ist nicht untersucht. Die Bäume lassen sich später mit MultiMesh bündeln.
 
 ## Qualität und Performance (ab Phase 3 messen)
 Ziel 60 fps (Sparmodus 30), Frame-Zeit-Overlay im Debug-Build, Draw-Call- und Speicherbudget, ASTC-Texturen, LODs, Streaming der Weltabschnitte. Messen kann nur der Nutzer am Gerät; Claude wertet die Rückmeldung aus.
