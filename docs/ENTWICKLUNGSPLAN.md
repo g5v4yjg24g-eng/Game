@@ -32,10 +32,17 @@ Jede Phase endet mit einem getesteten Stand und einem Eintrag im [Changelog](CHA
 - [x] Logik-Tests (45) und zwei Simulationen (Bewegung, Touch) laufen lokal grün
 - [ ] CI auf GitHub grün (nach dem Push prüfen)
 - [x] Am iPhone getestet (Nutzer 2026-11-24, Build 5): „sieht alles gut aus“; Kamera darf etwas schneller sein (umgesetzt: 0,2 statt 0,16)
-- [ ] Bildrate und Safe Area mit Messwerten belegt (Zahlen aus der Messanzeige stehen noch aus)
+- [x] Messwerte am Gerät (Nutzer 2026-11-24, Build 5, iPhone 16 Pro Max): konstant 60 fps, 130 Draw Calls, 206 Objekte. Safe Area: „sieht alles gut aus“.
 - [ ] Spielgefühl nach Rückmeldung nachjustieren (Werte in `core/controls_config.gd`)
 
 Nicht Teil von Phase 3: richtiges Ninja-Modell und Animationen (Platzhalter), Lock-on-Kamera, Kampf (Phase 4).
+
+## Messwerte
+| Datum | Stand | Gerät | fps | Draw Calls | Objekte |
+|---|---|---|---|---|---|
+| 2026-11-24 | Prototyp, Build 5 (60-fps-Deckel) | iPhone 16 Pro Max, iOS 27.2.1 | konstant 60 | 130 | 206 |
+
+Hinweis: Wegen des 60-fps-Deckels sagt „konstant 60“ nur, dass das Ziel erreicht ist, nicht wie viel Reserve bleibt. Für die Reserve und für ältere iPhones braucht es später einen Test ohne Deckel oder mit GPU-Zeit (Debug-Schalter, geplant). Die Draw Calls (130) liegen deutlich unter den 158 des Software-Screenshots am PC, weil der Mobile-Renderer anders zusammenfasst; die Bäume lassen sich später mit MultiMesh noch bündeln.
 
 ## Qualität und Performance (ab Phase 3 messen)
 Ziel 60 fps (Sparmodus 30), Frame-Zeit-Overlay im Debug-Build, Draw-Call- und Speicherbudget, ASTC-Texturen, LODs, Streaming der Weltabschnitte. Messen kann nur der Nutzer am Gerät; Claude wertet die Rückmeldung aus.

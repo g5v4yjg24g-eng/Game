@@ -7,6 +7,7 @@
 - Bildrate auf 60 fps begrenzt, Physik-Interpolation für ruhige Bewegung bei hoher Bildwiederholrate.
 - 45 Logik-Tests und zwei Simulationen (Bewegung, Touch) lokal grün; beide Simulationen laufen in der CI.
 - Erste Übersetzungsdatei `locale/de.po` für die Knopfbeschriftungen.
+- Messwerte am iPhone 16 Pro Max (Build 5): konstant 60 fps, 130 Draw Calls, 206 Objekte.
 - Am iPhone getestet (Build 5): Steuerung in Ordnung, Kamera auf Wunsch etwas schneller (0,2 Grad pro Pixel). Die Empfindlichkeit steckt jetzt im Kamera-Rig, damit später ein Schieberegler in den Einstellungen sie setzen kann.
 
 ## 2026-11-24 – Erster erfolgreicher iPhone-Build
