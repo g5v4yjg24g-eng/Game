@@ -1,5 +1,14 @@
 # Changelog
 
+## 2026-11-24 – Ninja-Modell (Branch `claude/ninja-modell`)
+- Neue Spielfigur statt Platzhalter: eigenes Modell aus `tools/blender/build_ninja.py` (Skelett mit 21 Knochen, Schal-Kette, etwa 7 000 Dreiecke).
+- Sieben Animationen: `idle`, `run`, `sneak`, `sneak_idle`, `jump`, `fall`, `land`; Tempo der Schritte passt sich der Geschwindigkeit an, weiche Übergänge.
+- `gameplay/animation_logic.gd` wählt die Animation (19 neue Tests, insgesamt 64); die Simulation prüft die Zuordnung und die Folge jump → fall → land.
+- Die `.glb` liegt in Git LFS; Lizenzvermerk und Anleitung zum Neuerzeugen unter `assets/characters/ninja` und `tools/blender`.
+- Noch nicht am iPhone gesehen.
+- Zielrichtung für die Figur festgehalten (Referenzbild des Nutzers: Chibi-Cartoon-Ninja mit rotem Stirnband); Umbau nach dem Test dieses Zwischenstands.
+- Entscheidung: Cartoon-Stil für das ganze Spiel, Story bleibt ernst, fiktive Figuren kommen später (docs/ENTSCHEIDUNGEN.md, docs/KONZEPT.md).
+
 ## 2026-11-24 – Phase 3 (Prototyp), Branch `claude/phase-3-prototyp`
 - Spielbarer Prototyp: Testwelt aus Code, Platzhalterfigur, Kamera mit Hinderniserkennung, Bewegung relativ zur Kamera, Sprung, Schleichen.
 - Touch-Steuerung: schwebender Joystick (links), Kamera per Wischen (rechts), Knöpfe Sprung und Schleichen, Safe Area, Mehrfingerbedienung, Zurücksetzen beim Wechsel in den Hintergrund.

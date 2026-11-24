@@ -19,7 +19,8 @@ Ein Dorf, ein Wald, eine Festung. Drei Gegnertypen, ein Miniboss, eine Hauptmiss
 | Bereich | Stand |
 |---|---|
 | Kamera | Third-Person mit geführter Kamera und Lock-on, freie Kamera optional |
-| Grafik | Stilisiert mit starkem Licht, Nebel, Wetter; Low-Poly-Basis, später nachschärfen |
+| Grafik | **Cartoon-Stil für das ganze Spiel** (Referenz: Chibi-Ninja mit Umrissen und flächiger Schattierung), Entscheidung Nutzer 2026-11-24. Licht, Nebel und Wetter bleiben Mittel für die Stimmung. |
+| Ton | Ernste Geschichte trotz Cartoon-Stil; fiktive Figuren und Wesen kommen später dazu |
 | Welt | Hubs mit Missionsgebieten statt Open World |
 | Kampf | Hybrid: Schleich-Tötungen plus Parieren/Ausweichen |
 | Steuerung | Touch: Joystick links, Kamera rechts, Aktionsknöpfe; Controller später |

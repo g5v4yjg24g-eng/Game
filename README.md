@@ -39,6 +39,7 @@ Kein Web-Spiel, keine PWA.
 | `scenes/` | Szenen |
 | `tests/` | Tests der Spiellogik |
 | `ios/` | Icon und Export-Einstellungen für iOS |
+| `tools/` | Hilfsskripte, z. B. `tools/blender/build_ninja.py` (erzeugt die Spielfigur) |
 
 ## Steuerung (Touch)
 - **Links** irgendwo aufsetzen und ziehen: schwebender Joystick, die Figur läuft relativ zur Kamera.

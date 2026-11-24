@@ -10,6 +10,7 @@ Jede Phase endet mit einem getesteten Stand und einem Eintrag im [Changelog](CHA
 | 4 Kampf | Angriff, Verteidigung, Ausweichen, Gegner-KI, Animationen | offen |
 | 5 Spielwelt | Landschaft, Gebäude, NPCs, interaktive Objekte | offen |
 | 6 Fortschritt | Missionen, Inventar, Fähigkeiten, Speichern | offen |
+| 3c Cartoon-Stil (neu, 2026-11-24) | Umrisse und flächige Schattierung als Shader, Figur nach Referenz umbauen, Welt anpassen; Kosten für Bildrate und Akku am Gerät messen | offen, nach dem Test von Build 6 |
 | 7 Design und Sound | Oberfläche (inkl. Einstellungen mit Kamera-Schieberegler), Effekte, Musik, Geräusche | offen |
 | 8 TestFlight | Native Builds, Performance, Fehler, Gerätetests | offen |
 | 9 Veröffentlichung | App-Store-Vorbereitung | offen |
@@ -35,7 +36,12 @@ Jede Phase endet mit einem getesteten Stand und einem Eintrag im [Changelog](CHA
 - [x] Messwerte am Gerät (Nutzer 2026-11-24, Build 5, iPhone 16 Pro Max): konstant 60 fps, 130 Draw Calls, 206 Objekte. Safe Area: „sieht alles gut aus“.
 - [ ] Spielgefühl nach Rückmeldung nachjustieren (Werte in `core/controls_config.gd`)
 
-Nicht Teil von Phase 3: richtiges Ninja-Modell und Animationen (Platzhalter), Lock-on-Kamera, Kampf (Phase 4).
+Nachtrag Phase 3b (Branch `claude/ninja-modell`):
+- [x] Eigenes Ninja-Modell (Blender-Skript) mit Skelett, Schal-Kette und sieben Animationen: Stehen, Laufen, Schleichen, geduckt Stehen, Sprung, Fall, Landung
+- [x] Animationsauswahl als reine Logik mit Tests (`gameplay/animation_logic.gd`), Anbindung an die Figur, Simulation prüft idle/run/sneak und jump → fall → land
+- [ ] Am iPhone gesehen und bewertet (Aussehen, Animationen, Bildrate mit Modell) – nur der Nutzer kann das prüfen
+
+Bewusst noch nicht enthalten: Gehen (nur Laufen und Schleichen), Lock-on-Kamera, Kampf (Phase 4), Gesichts- und Stoffdetails, Texturen. Die Figur ist ein stilisiertes Modell aus glatten Grundformen, keine Charakterkunst in Studioqualität.
 
 ## Messwerte
 | Datum | Stand | Gerät | fps | Draw Calls | Objekte |
