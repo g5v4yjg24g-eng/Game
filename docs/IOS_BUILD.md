@@ -28,7 +28,8 @@ Zugangsdaten stehen nie im Repo. Im Preset steht nur der Platzhalter `TEAM_ID`; 
   - Lauf 3 (`main`): Der Prüfschritt zeigte, dass die Form der Werte stimmte, Apple die Zugangsdaten aber ablehnte (HTTP 401). Key-ID, Issuer-ID und `.p8` gehörten nicht zusammen. Der Nutzer hat einen neuen Teamschlüssel erstellt und alle drei Secrets ersetzt.
   - **Lauf 4 (`main`, Commit `b80ac6c`): alle Schritte grün**, auch „Für den App Store signieren und zu TestFlight hochladen“ (Dauer gesamt etwa 5 Minuten).
 - **Zugangsdaten-Prüfung:** Der Schritt „Zugangsdaten bei Apple prüfen“ (`ios/check-asc.mjs`) läuft jetzt vor dem Godot-Export. Er prüft die Form der Werte, liest die `.p8`, fragt die App-Store-Connect-API nach der Bundle-ID und nennt die Ursache, ohne Schlüssel auszugeben.
-- **[O] Noch ungeprüft:** Ob der Build in App Store Connect unter TestFlight erscheint und von Apple verarbeitet wird (der Upload-Schritt war grün, die Bestätigung durch den Nutzer fehlt), und der Start des Spiels auf dem iPhone.
+- **Geprüft am Gerät (2026-11-24):** Der Build läuft über TestFlight auf dem iPhone 16 Pro Max (iOS 27.2.1). Screenshot des Nutzers: Querformat, Testszene mit „Kagero“ und Bildratenanzeige (81 fps in einer leeren Szene, Einzelwert ohne Messreihe). Safe Area und Dynamic Island sind im Screenshot nicht kritisch, das Layout ist mittig.
+- **[O] Noch offen:** Leistungsmessung mit echten Inhalten (ab Phase 3), Verhalten auf älteren iPhones.
 - **Testgerät:** iPhone 16 Pro Max mit iOS 27.2.1. **[O] Mindest-iOS 15.0** ist vorläufig.
 
 ## Release-Checkliste (später)
