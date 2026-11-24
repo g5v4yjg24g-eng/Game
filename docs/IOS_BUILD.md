@@ -23,9 +23,13 @@ Zugangsdaten stehen nie im Repo. Im Preset steht nur der Platzhalter `TEAM_ID`; 
 
 ## Geprüft und ungeprüft
 - **Geprüft (2026-11-24, Linux, Godot 4.5.1):** Der Export erzeugt `build/ios/Kagero.xcodeproj` mit Bundle-ID `com.fangpunkt.game`, Team-ID, Mindest-iOS 15.0, nur iPhone, Querformat, App-Icon und gemeinsamem Schema `Kagero`.
-- **[O] Ungeprüft:** `xcodebuild archive` und `-exportArchive` auf dem macOS-Runner, der TestFlight-Upload, der Start des Builds auf dem iPhone. Mögliche Stolpersteine: Name des Xcode-Schemas, Signieren ohne Ad-hoc-Berechtigungen, Gültigkeit der Export-Templates auf dem Runner. Der erste Lauf zeigt das; Fehler kommen in dieses Dokument.
+- **Erster Lauf auf GitHub (2026-11-24, Run 1, `macos-15-intel`, Branch `claude/phase-2-grundgeruest`):**
+  - Erfolgreich: Secrets vorhanden, Godot und Export-Templates geladen, Import, Export zum Xcode-Projekt, Xcode gewählt, **Archiv gebaut** (`ARCHIVE SUCCEEDED`).
+  - **Fehlgeschlagen:** „Für den App Store signieren und zu TestFlight hochladen“ mit `Auth error` (CDWebService Code 1235) und `No Accounts with App Store Connect Access`. Apple hat die API-Zugangsdaten abgelehnt. Das Spiel selbst ist nicht die Ursache.
+  - Mögliche Ursachen (Prüfung siehe unten): Key-ID, Issuer-ID und `.p8` gehören nicht zusammen, ein Wert ist abgeschnitten oder hat Leerzeichen, es ist ein individueller statt ein Teamschlüssel, oder der Schlüssel hat zu wenig Rechte oder wurde widerrufen.
+- **Zugangsdaten-Prüfung:** Der Schritt „Zugangsdaten bei Apple prüfen“ (`ios/check-asc.mjs`) läuft jetzt vor dem Godot-Export. Er prüft die Form der Werte, liest die `.p8`, fragt die App-Store-Connect-API nach der Bundle-ID und nennt die Ursache, ohne Schlüssel auszugeben.
+- **[O] Noch ungeprüft:** der TestFlight-Upload selbst, der Start des Builds auf dem iPhone und ob die Xcode-Version des Runners für TestFlight reicht (das Archiv wurde damit gebaut, Apples Mindest-SDK-Prüfung kommt erst beim Upload).
 - **Testgerät:** iPhone 16 Pro Max mit iOS 27.2.1. **[O] Mindest-iOS 15.0** ist vorläufig.
-- **[O] Xcode auf dem Runner:** Apple verlangt für TestFlight-Uploads eine Mindestversion des iOS-SDK. Ob die auf `macos-15-intel` oder `macos-15` installierte Xcode-Version dafür reicht, zeigt erst der erste Lauf. Der Workflow wählt die neueste installierte Version.
 
 ## Release-Checkliste (später)
 Datenschutzangaben, Altersfreigabe, Screenshots, Beschreibung, Exportcompliance (`ITSAppUsesNonExemptEncryption` steht auf `false`) – siehe Phase 9.
