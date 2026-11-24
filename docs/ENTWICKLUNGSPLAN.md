@@ -48,6 +48,10 @@ Bewusst noch nicht enthalten: Gehen (nur Laufen und Schleichen), Lock-on-Kamera,
 |---|---|---|---|---|---|
 | 2026-11-24 | Prototyp, Build 5 (60-fps-Deckel) | iPhone 16 Pro Max, iOS 27.2.1 | konstant 60 | 130 | 206 |
 
+| 2026-11-24 | Prototyp mit Ninja-Modell, Build 6 (60-fps-Deckel), 3 Bildschirmaufnahmen des Nutzers | iPhone 16 Pro Max, iOS 27.2.1 | 59 bis 61 | 35 bis 149 (je nach Blickrichtung) | 109 bis 225 |
+
+**Auswertung der Aufnahmen (2026-11-24):** Bildabstände konstant 16,7 ms, in der längsten Aufnahme (5,6 s) ändert sich jedes Bild, die Kamerabewegung ist gleichmäßig (Abweichung von der glatten Bewegung unter 0,3 Pixel). Stillstände von 250 bis 400 ms in zwei Aufnahmen fallen mit iOS-Einblendungen zusammen (Fokus-Schalter am Anfang, Aufnahme-Ende), nicht mit dem Spiel. Ruckeln lässt sich aus den Aufnahmen nicht belegen. Nicht erfassbar: das Gefühl auf dem 120-Hz-Display (Aufnahmen sind auf 60 fps begrenzt), Eingabeverzögerung und die Wirkung der Animationen. Hypothese: Der Deckel von 60 fps wirkt neben dem 120-Hz-System weniger flüssig; Test mit 120 fps.
+
 Hinweis: Wegen des 60-fps-Deckels sagt „konstant 60“ nur, dass das Ziel erreicht ist, nicht wie viel Reserve bleibt. Für die Reserve und für ältere iPhones braucht es später einen Test ohne Deckel oder mit GPU-Zeit (Debug-Schalter, geplant). Die Draw Calls (130) weichen von den 158 im Software-Screenshot am PC ab (anderer Renderer, anderer Blickwinkel); die Ursache ist nicht untersucht. Die Bäume lassen sich später mit MultiMesh bündeln.
 
 ## Qualität und Performance (ab Phase 3 messen)

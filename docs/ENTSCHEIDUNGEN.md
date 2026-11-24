@@ -15,7 +15,7 @@
 | Touch-Steuerung | Entschieden (Nutzer 2026-11-24: „wie geplant“) | Schwebender Joystick links (Mitte dort, wo der Daumen aufsetzt), Kamera per Wischen in der rechten Hälfte |
 | Sprung- und Schleichknopf | Vorläufig | Knöpfe rechts unten; Schleichen ist ein Umschalter (Vorschlag von Claude) |
 | Kamera-Empfindlichkeit | Entschieden (Nutzer 2026-11-24) | Standardwert etwas höher (0,2 statt 0,16 Grad pro Pixel, nach dem Test am iPhone). Später stellt der Nutzer sie selbst per **Schieberegler in den Einstellungen** ein. |
-| Bildrate | Vorläufig | Deckel 60 fps (`run/max_fps`), stabile Bildzeit und Akku vor 120 fps; später einstellbar (30/60) |
+| Bildrate | Vorläufig | Seit 2026-11-24 Deckel **120 fps** (`run/max_fps`), vorher 60. Anlass: Der Nutzer meldet „läuft noch nicht so flüssig“; die Aufnahmen zeigen konstante 60 fps ohne Ruckler, das Display kann aber 120 Hz. Test am Gerät offen; später einstellbar (30/60/120), Akku und Wärme beobachten. |
 | Arbeitstitel | Vorläufig | „Kagero“ |
 | Umfang Start | Vorläufig | Vertical Slice (Dorf, Wald, Festung) |
 | Kamera | Vorläufig | Geführte Third-Person mit Lock-on |

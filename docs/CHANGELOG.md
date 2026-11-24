@@ -6,6 +6,7 @@
 - Testknopf „Stil“ oben rechts und Stilanzeige in der Messanzeige, damit der Nutzer am iPhone vergleichen kann.
 - Prüfungen: 75 Logik-Tests, Simulation für Ein- und Ausschalten, neuer CI-Job `mobile-renderer` (echter Mobile-Renderer per Software-Vulkan, meldet Shader-Fehler).
 - Stil-Leitfaden `docs/STIL_CARTOON.md` mit Regeln, Messungen (Draw Calls im Cartoon-Modus etwa 20 bis 45 % höher) und offenen Punkten.
+- Bildratendeckel von 60 auf 120 fps angehoben (Test, weil der Nutzer „noch nicht so flüssig“ meldet; das Display kann 120 Hz, die App erlaubt es im Export).
 - Noch nicht am iPhone gesehen; Figur und Welt sind noch nicht im Referenzstil umgebaut.
 
 ## 2026-11-24 – Ninja-Modell (Branch `claude/ninja-modell`)
