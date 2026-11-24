@@ -863,11 +863,16 @@ def make_gait_strip(rig, actions, folder, clip, gait):
     rig.obj.location = (0.0, 0.0, 0.0)
 
 
-def export_glb(path):
+def export_glb(path, objects):
+    """Exportiert nur die Figur. Die Vorschau-Szene (Boden, Bodenmarken, Licht, Kamera) darf nie
+    mit in die Datei, sonst läuft im Spiel eine Ebene mit der Figur mit (Fehler in Build 10)."""
     bpy.ops.object.select_all(action="DESELECT")
+    for obj in objects:
+        obj.select_set(True)
     bpy.ops.export_scene.gltf(
         filepath=path,
         export_format="GLB",
+        use_selection=True,
         export_yup=True,
         export_apply=False,
         export_skins=True,
@@ -912,7 +917,7 @@ def main():
         make_previews(rig, actions, preview)
         make_gait_strip(rig, actions, os.path.join(preview, "lauf"), "run-loop", RUN)
         make_gait_strip(rig, actions, os.path.join(preview, "schleichen"), "sneak-loop", SNEAK)
-    export_glb(out)
+    export_glb(out, [arm_obj, mesh_obj, outline_obj])
     tris = sum(len(p.vertices) - 2 for p in mesh_obj.data.polygons)
     print(f"Fertig: {out} – {len(mesh_obj.data.vertices)} Punkte, {tris} Dreiecke (Umriss-Mesh zusätzlich), {len(actions)} Animationen")
 
