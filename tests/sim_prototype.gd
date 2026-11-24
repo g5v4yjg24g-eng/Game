@@ -88,14 +88,27 @@ func _ready() -> void:
 	var seen: Array[StringName] = []
 	bus.jump_pressed.emit()
 	var peak := ground_y
+	var flip_max := 0.0
+	var head_forward_max := 0.0
 	for i in 100:
 		await get_tree().physics_frame
 		peak = maxf(peak, player.global_position.y)
+		flip_max = maxf(flip_max, player.flip_angle_deg())
+		head_forward_max = maxf(head_forward_max, player.head_forward())
 		var name := player.current_animation()
 		if seen.is_empty() or seen[-1] != name:
 			seen.append(name)
 	_check(peak - ground_y > 0.8, "Sprung hebt die Figur an (%.2f m)" % (peak - ground_y))
 	_check(player.is_on_floor(), "Figur landet wieder")
+	_check(flip_max > 300.0, "Sprung macht einen Salto vorwärts (%.0f Grad)" % flip_max)
+	_check(
+		head_forward_max > 0.9,
+		"Der Kopf kippt nach vorn, nicht nach hinten (%.2f)" % head_forward_max
+	)
+	_check(
+		not player.is_flipping() and absf(player.flip_angle_deg()) < 0.01,
+		"Nach der Landung steht die Figur wieder aufrecht"
+	)
 	_check(
 		seen.has(&"jump") and seen.has(&"fall") and seen.has(&"land"),
 		"Sprung zeigt jump, fall und land: %s" % [seen]

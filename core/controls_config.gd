@@ -41,4 +41,7 @@ const TURN_SPEED := 14.0
 const JUMP_SPEED := 7.0
 const GRAVITY := 22.0
 const JUMP_BUFFER_SECONDS := 0.12
+## Salto vorwärts beim Springen: Dauer der Drehung und Höhe des Drehpunkts (Körpermitte).
+const FLIP_SECONDS := 0.5
+const FLIP_CENTER_Y := 0.75
 const FALL_RESET_Y := -20.0
