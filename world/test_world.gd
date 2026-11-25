@@ -1,6 +1,7 @@
 class_name TestWorld
 extends Node3D
-## Testgelände für den Prototyp: Abendstimmung, Nebel, Torii, Hütte, Plattformen, Bäume.
+## Testgelände für den Prototyp: Goldene Stunde (warmes Licht, wenig Nebel), Torii, Hütte,
+## Plattformen, Bäume.
 ## Wird aus Code gebaut (Platzhalter ohne Fremd-Assets). Kollisionsebene 1 = Welt.
 
 var _rng := RandomNumberGenerator.new()
@@ -21,9 +22,9 @@ func _ready() -> void:
 
 func _build_environment() -> void:
 	var sky_material := ProceduralSkyMaterial.new()
-	sky_material.sky_top_color = Color(0.13, 0.17, 0.32)
-	sky_material.sky_horizon_color = Color(0.92, 0.55, 0.38)
-	sky_material.ground_horizon_color = Color(0.92, 0.55, 0.38)
+	sky_material.sky_top_color = Color(0.22, 0.42, 0.72)
+	sky_material.sky_horizon_color = Color(1.0, 0.74, 0.48)
+	sky_material.ground_horizon_color = Color(1.0, 0.74, 0.48)
 	sky_material.ground_bottom_color = Color(0.1, 0.1, 0.14)
 	var sky := Sky.new()
 	sky.sky_material = sky_material
@@ -32,11 +33,11 @@ func _build_environment() -> void:
 	environment.background_mode = Environment.BG_SKY
 	environment.sky = sky
 	environment.ambient_light_source = Environment.AMBIENT_SOURCE_SKY
-	environment.ambient_light_energy = 0.7
+	environment.ambient_light_energy = 0.9
 	environment.tonemap_mode = Environment.TONE_MAPPER_FILMIC
 	environment.fog_enabled = true
-	environment.fog_light_color = Color(0.78, 0.6, 0.55)
-	environment.fog_density = 0.012
+	environment.fog_light_color = Color(1.0, 0.8, 0.62)
+	environment.fog_density = 0.004
 	environment.fog_sky_affect = 0.35
 
 	var world_environment := WorldEnvironment.new()
@@ -44,9 +45,9 @@ func _build_environment() -> void:
 	add_child(world_environment)
 
 	var sun := DirectionalLight3D.new()
-	sun.rotation_degrees = Vector3(-16.0, -35.0, 0.0)
-	sun.light_color = Color(1.0, 0.72, 0.5)
-	sun.light_energy = 1.5
+	sun.rotation_degrees = Vector3(-26.0, -35.0, 0.0)
+	sun.light_color = Color(1.0, 0.83, 0.62)
+	sun.light_energy = 1.9
 	sun.shadow_enabled = true
 	sun.directional_shadow_mode = DirectionalLight3D.SHADOW_PARALLEL_2_SPLITS
 	sun.directional_shadow_max_distance = 45.0
@@ -55,13 +56,13 @@ func _build_environment() -> void:
 
 func _build_ground() -> void:
 	_add_box(
-		Vector3(0, -0.5, 0), Vector3(140, 1, 140), _material("moss", Color(0.2, 0.27, 0.15), 1.0)
+		Vector3(0, -0.5, 0), Vector3(140, 1, 140), _material("moss", Color(0.3, 0.46, 0.2), 1.0)
 	)
 
 
 ## Heller Weg vom Start zum Torii (nur Optik, keine Kollision).
 func _build_path() -> void:
-	var stone := _material("path", Color(0.45, 0.4, 0.34), 1.0)
+	var stone := _material("path", Color(0.72, 0.6, 0.44), 1.0)
 	var mesh := BoxMesh.new()
 	mesh.size = Vector3(3.0, 0.04, 30.0)
 	var strip := MeshInstance3D.new()

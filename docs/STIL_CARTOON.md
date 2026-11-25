@@ -50,15 +50,14 @@ Der Umriss kostet also grob **20 bis 45 % mehr Draw Calls** in den getesteten An
 Der Testknopf macht den Vergleich am Gerät möglich.
 
 ## Bekannte Grenzen
-- Nebel und Dämmerlicht der Testwelt machen die Umrisse blass und die Szene matschig. Für den Stil braucht die Welt eine eigene Farb- und Lichtabstimmung (offen).
-- Die Figur ist im Abend- und Nebellicht der Testwelt dunkel und klein; ohne eigene Licht- und Farbabstimmung der Welt liest sie sich im Cartoon-Modus schwach.
+- Der frühere dichte Abendnebel machte Umrisse blass und die Figur dunkel. Seit 2026-11-25 hat die Testwelt die „Goldene Stunde“ (Entscheidung Nutzer, Variante A, siehe ENTSCHEIDUNGEN.md); Aussehen am Gerät **[O]**.
 - Der Umriss der Figur verdoppelt die Skinning-Arbeit (3 844 Punkte zusätzlich), unkritisch, aber zu messen.
 - Dünne Teile (Schal, Schwertscheide) bekommen eine gleich breite Linie und wirken dadurch kräftiger.
 - Augen und Gesicht brauchen später eine kleine Textur oder eigene Geometrie; reine Flächenfarben reichen für den Ausdruck im Referenzbild nicht.
 
 ## Nächste Schritte
 1. Am iPhone mit dem Testknopf vergleichen: Aussehen, Bildrate, Akku (nur der Nutzer kann das prüfen).
-2. Entscheidungen: Nebel und Lichtstimmung, endgültige Palette, Umrissbreite.
+2. Entscheidungen: Lichtstimmung der Testwelt ist gefallen (Goldene Stunde); offen: endgültige Palette der späteren Welt, Umrissbreite.
 3. Figur: erste Version steht; Feinschliff nach Rückmeldung, danach Animationen perfektionieren (Phase 3c).
 4. Welt-Teile im Stil neu aufbauen (Gebäude, Bäume, Gelände).
 5. Oberfläche im Stil.

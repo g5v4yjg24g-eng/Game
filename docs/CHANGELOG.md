@@ -1,5 +1,9 @@
 # Changelog
 
+## Unveröffentlicht – Weltstimmung „Goldene Stunde“ (Branch `claude/welt-goldene-stunde`)
+- Testwelt auf Variante A umgestellt (Nutzerentscheidung): wärmeres, höheres Sonnenlicht, wenig Nebel, grünes Gras, heller Weg, blauer Himmel mit warmem Horizont. Nur Werte in `world/test_world.gd`.
+- Aussehen und Bildrate am Gerät **[O]**.
+
 ## Unveröffentlicht – Fehler in Build 10: mitlaufende Ebene
 - **Salto mit angezogenen Knien** (Wunsch Nutzer 2026-11-24): neuer Clip `flip` (Knie zur Brust, runder Rücken, Hände an den Schienbeinen, am Ende wieder geöffnet), läuft genau so lange wie der Salto-Winkel (0,5 s) und ersetzt `jump` beim Absprung. Logik `AnimationLogic.pick(…, flipping)`, Tests und Simulation angepasst. Wirkung am Gerät **[O]**; Stärke des Anziehens bei Bedarf nachstellen (`flip_pose` im Blender-Skript).
 - Fehler: Im Spiel lief unter der Figur eine helle Fläche samt gestrichelter Linie mit. Ursache: Das Blender-Skript exportierte mit angegebenem Vorschau-Ordner die ganze Szene, also auch Vorschau-Boden (6 × 6 m) und Bodenmarken. Betraf die `ninja.glb` seit den Lauf-Vorschauen (Commit `68882cb`), im Cartoon-Stil besonders sichtbar.

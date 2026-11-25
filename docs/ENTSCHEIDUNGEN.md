@@ -63,3 +63,9 @@ Rückmeldung des Nutzers: „Jetzt sieht das Laufen so aus, als würde ich rück
 - Befund: Der Zyklus aus Build 8 hatte winzige Schritte (Fußweg 0,36 m, Bodenkontakt 0,07 s, beide Füße etwa 74 % der Zeit in der Luft, Fußhöhe 5 cm) bei 5,2 m/s und 0,51 m langen Beinen: Der Körper glitt über die Füße hinweg (Trippeln), was sich wie Rückwärtslaufen lesen kann. Die Fußhöhe hatte ich nach dem Hinweis „Knie zu hoch“ (Fußhöhe 26 cm, wie bei einer Fersen-zum-Po-Übung) zu weit abgesenkt.
 - Jetzt: Zyklus 0,40 s (5 Schritte je Sekunde), Fußweg 0,50 m, Bodenkontakt 0,12 s, Fußhöhe 8 cm, etwa 20 % Gleiten erlaubt (Standfuß mit 80 % des Körpertempos, bei Cartoon-Figuren üblich). Kniebeugung bis 93 Grad.
 - Das Gleiten und die Fußhöhe sind Geschmackswerte und stehen als Konstanten im Blender-Skript (`RUN_GROUND_RATIO`, `RUN_LIFT`).
+
+## Weltstimmung der Testwelt (Entscheidung Nutzer, 2026-11-25)
+Vier Varianten im Cartoon-Stil verglichen (jetzt, A Goldene Stunde, B Tag, C kräftige Dämmerung). Gewählt: **A „Goldene Stunde“**, Empfehlung von Claude.
+- Werte (`world/test_world.gd`): Himmel oben (0,22 / 0,42 / 0,72), Horizont (1,0 / 0,74 / 0,48); Nebel Dichte 0,004 (vorher 0,012), warm; Sonne Neigung −26° (vorher −16°), Stärke 1,9, warmes Licht; Umgebungslicht 0,9; Gras (0,30 / 0,46 / 0,20), Weg (0,72 / 0,60 / 0,44).
+- Gedanke: Abendstimmung bleibt (passt zur ernsten Geschichte), Umrisse und Figur sind aber klar lesbar. Spätere Orte und Missionen können andere Tageszeiten bekommen (z. B. Nacht für Aufträge).
+- Aussehen am Gerät **[O]**.
